@@ -12,7 +12,7 @@ private:
 	OperatorType _type;
 	string _symb;
 public:
-	Operator(string);
+	Operator(string, OperatorType);
 	~Operator();
 	string GetSymb();
 	string ToString();

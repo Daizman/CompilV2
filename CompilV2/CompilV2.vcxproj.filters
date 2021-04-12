@@ -16,17 +16,11 @@
     <Filter Include="Исходные файлы\Modules">
       <UniqueIdentifier>{5382b573-4b48-4d9c-9719-dbd0c8bdca3d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Исходные файлы\Const">
-      <UniqueIdentifier>{d0ee5bdf-28e9-4ebe-95e1-915091ba4bba}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Исходные файлы\Structs">
       <UniqueIdentifier>{26957c96-af85-48cc-89e7-dd1f20646f88}</UniqueIdentifier>
     </Filter>
     <Filter Include="Файлы заголовков\Modules">
       <UniqueIdentifier>{5e002752-ae08-4965-a86e-71ea9c8946d0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Файлы заголовков\Const">
-      <UniqueIdentifier>{d0c41982-ff0d-4e7f-b0b5-4f39df3ce5bd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Файлы заголовков\Structs">
       <UniqueIdentifier>{00b492f8-888b-433e-845d-48781c7ed1a2}</UniqueIdentifier>
@@ -50,6 +44,15 @@
     </ClCompile>
     <ClCompile Include="Token.cpp">
       <Filter>Исходные файлы\Structs</Filter>
+    </ClCompile>
+    <ClCompile Include="Error.cpp">
+      <Filter>Исходные файлы\Structs</Filter>
+    </ClCompile>
+    <ClCompile Include="IOModule.cpp">
+      <Filter>Исходные файлы\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Lexer.cpp">
+      <Filter>Исходные файлы\Modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,6 +81,15 @@
     </ClInclude>
     <ClInclude Include="Token.hpp">
       <Filter>Файлы заголовков\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="Error.hpp">
+      <Filter>Файлы заголовков\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="IOModule.hpp">
+      <Filter>Файлы заголовков\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Lexer.hpp">
+      <Filter>Файлы заголовков\Modules</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

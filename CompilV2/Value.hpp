@@ -11,47 +11,46 @@ using std::to_string;
 class Value {
 private:
 	ValueType _type;
-	string _name;
 public:
 	ValueType GetType();
 	virtual string ToString() = 0;
-	Value(ValueType, string);
+	Value(ValueType);
 	~Value();
 };
 
-class IntIdentificator : public Value {
+class IntValue : public Value {
 private:
 	int _val;
 public:
 	string ToString() override;
 	int GetValue();
-	IntIdentificator(int, string);
+	IntValue(int);
 };
 
-class FloatIdentificator : public Value {
+class DoubleValue : public Value {
 private:
-	float _val;
+	double _val;
 public:
 	string ToString() override;
-	float GetValue();
-	FloatIdentificator(float, string);
+	double GetValue();
+	DoubleValue(double);
 };
 
-class CharIdentificator : public Value {
+class CharValue : public Value {
 private:
 	char _val;
 public:
 	string ToString() override;
 	char GetValue();
-	CharIdentificator(char, string);
+	CharValue(char);
 };
 
-class StringIdentificator : public Value {
+class StringValue : public Value {
 private:
 	string _val;
 public:
 	string ToString() override;
 	string GetValue();
-	StringIdentificator(string, string);
+	StringValue(string);
 };
 

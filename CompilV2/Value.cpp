@@ -2,9 +2,8 @@
 #include "Value.hpp"
 
 
-Value::Value(ValueType itype, string name) {
+Value::Value(ValueType itype) {
 	_type = itype;
-	_name = name;
 }
 
 Value::~Value() {
@@ -16,53 +15,53 @@ ValueType Value::GetType() {
 }
 
 
-IntIdentificator::IntIdentificator(int val, string name) :Value(ValueType::INTEGER, name) {
+IntValue::IntValue(int val) :Value(ValueType::INTEGER) {
 	_val = val;
 }
 
-string IntIdentificator::ToString() {
+string IntValue::ToString() {
 	return to_string(_val);
 }
 
-int IntIdentificator::GetValue() {
+int IntValue::GetValue() {
 	return _val;
 }
 
 
-FloatIdentificator::FloatIdentificator(float val, string name) :Value(ValueType::FLOAT, name) {
+DoubleValue::DoubleValue(double val) :Value(ValueType::FLOAT) {
 	_val = val;
 }
 
-string FloatIdentificator::ToString() {
+string DoubleValue::ToString() {
 	return to_string(_val);
 }
 
-float FloatIdentificator::GetValue() {
+double DoubleValue::GetValue() {
 	return _val;
 }
 
 
-CharIdentificator::CharIdentificator(char val, string name) :Value(ValueType::CHARACTER, name) {
+CharValue::CharValue(char val) :Value(ValueType::CHARACTER) {
 	_val = val;
 }
 
-string CharIdentificator::ToString() {
+string CharValue::ToString() {
 	return string(1, _val);
 }
 
-char CharIdentificator::GetValue() {
+char CharValue::GetValue() {
 	return _val;
 }
 
 
-StringIdentificator::StringIdentificator(string val, string name) :Value(ValueType::STRING, name) {
+StringValue::StringValue(string val) :Value(ValueType::STRING) {
 	_val = val;
 }
 
-string StringIdentificator::ToString() {
+string StringValue::ToString() {
 	return _val;
 }
 
-string StringIdentificator::GetValue() {
+string StringValue::GetValue() {
 	return _val;
 }

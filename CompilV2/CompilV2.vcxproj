@@ -139,7 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Error.cpp" />
     <ClCompile Include="Identificator.cpp" />
+    <ClCompile Include="IOModule.cpp" />
+    <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="Operator.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Token.cpp" />
@@ -149,7 +152,10 @@
     <Text Include="testInput1.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Error.hpp" />
     <ClInclude Include="Identificator.hpp" />
+    <ClInclude Include="IOModule.hpp" />
+    <ClInclude Include="Lexer.hpp" />
     <ClInclude Include="Operator.hpp" />
     <ClInclude Include="Token.hpp" />
     <ClInclude Include="Value.hpp" />
