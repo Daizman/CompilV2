@@ -20,7 +20,7 @@ IntValue::IntValue(int val) :Value(ValueType::INTEGER) {
 }
 
 string IntValue::ToString() {
-	return to_string(_val);
+	return "Value: " + to_string(_val) + "\n";
 }
 
 int IntValue::GetValue() {
@@ -33,7 +33,7 @@ DoubleValue::DoubleValue(double val) :Value(ValueType::FLOAT) {
 }
 
 string DoubleValue::ToString() {
-	return to_string(_val);
+	return "Value: " + to_string(_val) + "\n";
 }
 
 double DoubleValue::GetValue() {
@@ -46,7 +46,7 @@ CharValue::CharValue(char val) :Value(ValueType::CHARACTER) {
 }
 
 string CharValue::ToString() {
-	return string(1, _val);
+	return "Value: " + string(1, _val) + "\n";
 }
 
 char CharValue::GetValue() {
@@ -59,7 +59,7 @@ StringValue::StringValue(string val) :Value(ValueType::STRING) {
 }
 
 string StringValue::ToString() {
-	return _val;
+	return "Value: " + _val + "\n";
 }
 
 string StringValue::GetValue() {

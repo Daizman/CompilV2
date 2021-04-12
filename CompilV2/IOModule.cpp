@@ -3,15 +3,17 @@
 
 
 char IOModule::GetNextSymb() {
-	if (_input.eof()) {
-		_isEnd = true;
-		return '\0';
-	}
-	if (_curSymbNum >= _curString.length() || _curStringNum == 0) {
-		SkipSpaces();
+	if (_curSymbNum >= _curString.length() - 1) {
 		if (_input.eof()) {
 			_isEnd = true;
-			return '\0';
+			_curSymb = '\0';
+			return _curSymb;
+		}
+		string oldStr = _curString;
+		SkipSpaces();
+		if (oldStr == _curString) {
+			getline(_input, _curString);
+			_curStringNum++;
 		}
 		_curSymbNum = 0;
 	}
@@ -44,10 +46,10 @@ bool IOModule::IsEnd() {
 }
 
 string IOModule::CheckNextRange(int range) {
-	if (_curSymbNum + range >= _curString.length()) {
-		range = _curString.length() - _curSymbNum;
+	if (_curSymbNum + range + 1 >= _curString.length()) {
+		range = _curString.length() - _curSymbNum - 1;
 	}
-	return _curString.substr(_curStringNum, range);
+	return _curString.substr(_curSymbNum + 1, range);
 }
 
 void IOModule::WriteNext() {
@@ -64,6 +66,7 @@ void IOModule::RaiseError(Error error) {
 
 void IOModule::SkipSymb() {
 	_curSymbNum++;
+	_curSymb = _curString[_curSymbNum];
 }
 
 void IOModule::SkipSpaces() {
@@ -75,6 +78,9 @@ void IOModule::SkipSpaces() {
 			_curStringNum++;
 			_curSymbNum = 0;
 		}
+	}
+	if (!_input.eof()) {
+		_curSymb = _curString[_curSymbNum];
 	}
 }
 
@@ -108,6 +114,10 @@ IOModule::IOModule(string iPath, string oPath) {
 	_curStringNum = 0;
 	_curSymbNum = 0;
 	OpenInput();
+	SkipSpaces();
+	getline(_input, _curString);
+	SkipSpaces();
+	_curSymb = _curString[_curSymbNum];
 }
 
 IOModule::~IOModule() {

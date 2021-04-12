@@ -59,24 +59,31 @@ Token* Lexer::GetNextToken() {
 	if (symb == '\0') {
 		return NULL;
 	}
+    if (symb == ' ') {
+        _ioModule->SkipSpaces();
+        symb = _ioModule->GetCurSymb();
+    }
     vector<char> word;
     word.push_back(symb);
 
 	if (IsCharacter(symb)) {
-		while (IsCharacter(symb) || IsDigit(symb)) {
+        char futureChar = _ioModule->CheckNextRange(1)[0];
+		while ((IsCharacter(futureChar) || IsDigit(futureChar)) && symb != '\0') {
 			symb = _ioModule->GetNextSymb();
 			word.push_back(symb);
+            futureChar = _ioModule->CheckNextRange(1)[0];
 		}
+        
 		string wordStr(word.begin(), word.end());
         auto it = _symbMap.find(wordStr);
         curStrNum = _ioModule->GetCurStringNum();
         curStrPos = _ioModule->GetCurSymbNum();
 		if (it != _symbMap.end()) {
 			auto sToken = new Operator(wordStr, _symbMap[wordStr]);
-			return new OperatorToken(sToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
 		} else {
             auto iToken = new Identificator(wordStr);
-            return new IdentificatorToken(iToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+            _curToken = new IdentificatorToken(iToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
 		}
 	} else if (IsDigit(symb)) {
         bool haveDot = false;
@@ -93,11 +100,11 @@ Token* Lexer::GetNextToken() {
         if (haveDot) {
             double dVal = stod(wordStr);
             auto vdToken = new DoubleValue(dVal);
-            return new ValueToken(vdToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+            _curToken = new ValueToken(vdToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
         } else {
             int iVal = stoi(wordStr);
             auto viToken = new IntValue(iVal);
-            return new ValueToken(viToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+            _curToken = new ValueToken(viToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
         }
 	} else if (symb == '\'') {
         symb = _ioModule->GetNextSymb();
@@ -111,25 +118,29 @@ Token* Lexer::GetNextToken() {
             curStrPos = _ioModule->GetCurSymbNum();
             if (word.size() == 3) {
                 auto vcToken = new CharValue(word[1]);
-                return new ValueToken(vcToken, curStrNum, curStrPos - 3, curStrPos);
+                _curToken = new ValueToken(vcToken, curStrNum, curStrPos - 3, curStrPos);
             } else {
                 string wordStr(word.begin() + 1, word.end() - 1);
                 auto vsToken = new StringValue(wordStr);
-                return new ValueToken(vsToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+                _curToken = new ValueToken(vsToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
             }
         } else {
             
         }
-	} else {
+    } else {
         string str = string(1, symb);
         auto it = _symbMap.find(str);
+        curStrNum = _ioModule->GetCurStringNum();
+        curStrPos = _ioModule->GetCurSymbNum();
         if (it != _symbMap.end()) {
             auto sToken = new Operator(str, _symbMap[str]);
-            return new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
+            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
         } else {
             
         }
 	}
+    _ioModule->GetNextSymb();
+    return _curToken;
 }
 
 Token* Lexer::GetCurToken() {
