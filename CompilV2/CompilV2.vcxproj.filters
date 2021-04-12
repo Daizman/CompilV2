@@ -45,6 +45,12 @@
     <ClCompile Include="Value.cpp">
       <Filter>Исходные файлы\Structs</Filter>
     </ClCompile>
+    <ClCompile Include="Operator.cpp">
+      <Filter>Исходные файлы\Structs</Filter>
+    </ClCompile>
+    <ClCompile Include="Token.cpp">
+      <Filter>Исходные файлы\Structs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="testInput1.txt">
@@ -65,6 +71,12 @@
       <Filter>Файлы заголовков\Structs\Enums</Filter>
     </ClInclude>
     <ClInclude Include="Value.hpp">
+      <Filter>Файлы заголовков\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="Operator.hpp">
+      <Filter>Файлы заголовков\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="Token.hpp">
       <Filter>Файлы заголовков\Structs</Filter>
     </ClInclude>
   </ItemGroup>

@@ -140,7 +140,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Identificator.cpp" />
+    <ClCompile Include="Operator.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Token.cpp" />
     <ClCompile Include="Value.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +150,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Identificator.hpp" />
+    <ClInclude Include="Operator.hpp" />
+    <ClInclude Include="Token.hpp" />
     <ClInclude Include="Value.hpp" />
     <ClInclude Include="ValueType.hpp" />
     <ClInclude Include="OperatorType.hpp" />
