@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Исходные файлы">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Файлы заголовков">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Исходные файлы\Modules">
+      <UniqueIdentifier>{5382b573-4b48-4d9c-9719-dbd0c8bdca3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Const">
+      <UniqueIdentifier>{d0ee5bdf-28e9-4ebe-95e1-915091ba4bba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Structs">
+      <UniqueIdentifier>{26957c96-af85-48cc-89e7-dd1f20646f88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Modules">
+      <UniqueIdentifier>{5e002752-ae08-4965-a86e-71ea9c8946d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Const">
+      <UniqueIdentifier>{d0c41982-ff0d-4e7f-b0b5-4f39df3ce5bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Structs">
+      <UniqueIdentifier>{00b492f8-888b-433e-845d-48781c7ed1a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Structs\Enums">
+      <UniqueIdentifier>{383abfdb-6e12-4ec1-93f2-91d00c2fc372}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Identificator.cpp">
+      <Filter>Исходные файлы\Structs</Filter>
+    </ClCompile>
+    <ClCompile Include="Value.cpp">
+      <Filter>Исходные файлы\Structs</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="testInput1.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TokenType.hpp">
+      <Filter>Файлы заголовков\Structs\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="OperatorType.hpp">
+      <Filter>Файлы заголовков\Structs\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="Identificator.hpp">
+      <Filter>Файлы заголовков\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="ValueType.hpp">
+      <Filter>Файлы заголовков\Structs\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="Value.hpp">
+      <Filter>Файлы заголовков\Structs</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

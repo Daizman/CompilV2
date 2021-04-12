@@ -1,0 +1,8 @@
+Program prog1;
+var a, b, c: integer;
+begin
+write('¬ведите два числа: ');
+readln(a, b);
+c := a + b;
+writeln('»х сумма равна: ', c);
+end.
