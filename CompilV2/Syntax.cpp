@@ -24,15 +24,36 @@ void Syntax::PrintErrors() {
 	_ioModule->PrintErrors(_errors);
 }
 
+bool Syntax::CheckIdents(IdentificatorToken* token) {
+	for (auto tok : _idents) {
+		if (tok->GetValue()->GetName() == token->GetValue()->GetName()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Syntax::SkipConsts(Token* token, IdentificatorToken* identToken, Identificator* ident) {
+	_idents.clear();
+	while (!_ioModule->IsEnd() && ident->GetName() != "type" && ident->GetName() != "var" && ident->GetName() != "begin") {
+		token = _lexer->GetNextToken();
+		while (!_ioModule->IsEnd() && token->GetType() != TokenType::IDENTIFICATOR) {
+			token = _lexer->GetNextToken();
+		}
+		if (token->GetType() == TokenType::IDENTIFICATOR) {
+			identToken = (IdentificatorToken*)token;
+			ident = identToken->GetValue();
+		}
+	}
+}
+
 // <программа>::=program <имя>; <блок>.
 void Syntax::BNFProg() {
 	IdentificatorToken* identToken;
 	OperatorToken* operToken;
-	ValueToken* valToken;
 
 	Identificator* ident;
 	Operator* oper;
-	Value* val;
 
 	auto token = _lexer->GetNextToken();
 	if (token->GetType() == TokenType::IDENTIFICATOR) {
@@ -68,12 +89,7 @@ void Syntax::BNFProg() {
 // <блок>::=<раздел констант><раздел типов><раздел переменных><раздел операторов>
 void Syntax::BNFBlock() {
 	IdentificatorToken* identToken;
-	OperatorToken* operToken;
-	ValueToken* valToken;
-
 	Identificator* ident;
-	Operator* oper;
-	Value* val;
 
 	auto token = _lexer->GetNextToken();
 	if (token->GetType() == TokenType::IDENTIFICATOR) {
@@ -120,7 +136,44 @@ void Syntax::BNFBlock() {
 
 // <раздел констант>::=<пусто>|const <определение константы>; {<определение константы>;}
 void Syntax::BNFConsts() {
-	
+	//если не было const, не попадем
+	IdentificatorToken* identToken;
+	OperatorToken* operToken;
+
+	Identificator* ident;
+	Operator* oper;
+
+	auto token = _lexer->GetNextToken();
+	if (token->GetType() == TokenType::IDENTIFICATOR) {
+		identToken = (IdentificatorToken*)token;
+		ident = identToken->GetValue();
+		while (!_ioModule->IsEnd() && ident->GetName() != "type" && ident->GetName() != "var" && ident->GetName() != "begin") {
+			BNFConstDif();
+			token = _lexer->GetNextToken();
+			if (token->GetType() == TokenType::OPERATOR) {
+				operToken = (OperatorToken*)token;
+				oper = operToken->GetValue();
+				if (oper->GetSymb() != ";") {
+					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закончено объявление константы", 18);
+					SkipConsts(token, identToken, ident);
+				} else {
+					token = _lexer->GetNextToken();
+					if (token->GetType() == TokenType::IDENTIFICATOR) {
+						identToken = (IdentificatorToken*)token;
+						ident = identToken->GetValue();
+					} else {
+						RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
+						SkipConsts(token, identToken, ident);
+					}
+				}
+			} else {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закончено объявление константы", 18);
+				SkipConsts(token, identToken, ident);
+			}
+		}
+	} else {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указано имя константы", 19);
+	}
 }
 
 // <раздел типов>::=<пусто>|type <определение типа>; {<определение типа>;}
@@ -140,12 +193,43 @@ void Syntax::BNFOpers() {
 
 // <определение константы>::=<имя>=<константа>
 void Syntax::BNFConstDif() {
+	IdentificatorToken* identToken;
+	OperatorToken* operToken;
+	ValueToken* valToken;
 
-}
+	Identificator* ident;
+	Operator* oper;
+	Value* val;
 
-// <константа>::=<число без знака>|<знак><число без знака> | <имя константы> | <знак><имя константы> | <строка>
-void Syntax::BNFConst() {
-	
+	auto token = _lexer->GetCurToken();
+	identToken = (IdentificatorToken*)token;
+	ident = identToken->GetValue();
+
+	auto eqToken = _lexer->GetNextToken();
+	if (eqToken->GetType() == TokenType::OPERATOR) {
+		operToken = (OperatorToken*)eqToken;
+		oper = operToken->GetValue();
+		if (oper->GetSymb() == "=") {
+			auto conToken = _lexer->GetNextToken();
+			if (conToken->GetType() == TokenType::VALUE) {
+				valToken = (ValueToken*)conToken;
+				_idents.push_back(identToken);
+			} else if (conToken->GetType() == TokenType::IDENTIFICATOR) {
+				auto testIdentToken = (IdentificatorToken*)conToken;
+				if (CheckIdents(testIdentToken)) {
+					_idents.push_back(identToken);
+				} else {
+					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Объявление константы не заданным идетификатором", 16);
+				}
+			} else {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление константы", 17);
+			}
+		} else {
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление константы", 17);
+		}
+	} else {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление константы", 17);
+	}
 }
 
 // <определение типа>::=<имя>=<тип>

@@ -98,6 +98,7 @@ Token* Lexer::GetNextToken() {
         _ioModule->GetNextSymb();
 	} else if (IsDigit(symb)) {
         bool haveDot = false;
+        bool raiseError = false;
         while (!_ioModule->IsEnd() && IsDigit(symb) || symb == '.') {
             symb = _ioModule->GetNextSymb();
             if (symb == '.') {
@@ -108,24 +109,28 @@ Token* Lexer::GetNextToken() {
                     curStrNum = _ioModule->GetCurStringNum();
                     curStrPos = _ioModule->GetCurSymbNum();
                     RaiseError(curStrPos, curStrNum, "Несколько точек в определении числа", 1);
-                    return GetNextToken();
+                    raiseError = true;
+                    _curToken = GetNextToken();
+                    break;
                 }
             }
             if (IsDigit(symb)) {
                 word.push_back(symb);
             }
         }
-        string wordStr(word.begin(), word.end());
-        curStrNum = _ioModule->GetCurStringNum();
-        curStrPos = _ioModule->GetCurSymbNum();
-        if (haveDot) {
-            double dVal = std::stod(wordStr);
-            auto vdToken = new DoubleValue(dVal);
-            _curToken = new ValueToken(vdToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
-        } else {
-            int iVal = stoi(wordStr);
-            auto viToken = new IntValue(iVal);
-            _curToken = new ValueToken(viToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+        if (!raiseError) {
+            string wordStr(word.begin(), word.end());
+            curStrNum = _ioModule->GetCurStringNum();
+            curStrPos = _ioModule->GetCurSymbNum();
+            if (haveDot) {
+                double dVal = std::stod(wordStr);
+                auto vdToken = new DoubleValue(dVal);
+                _curToken = new ValueToken(vdToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+            } else {
+                int iVal = stoi(wordStr);
+                auto viToken = new IntValue(iVal);
+                _curToken = new ValueToken(viToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+            }
         }
 	} else if (symb == '\'') {
         symb = _ioModule->GetNextSymb();
@@ -148,11 +153,11 @@ Token* Lexer::GetNextToken() {
                 auto vsToken = new StringValue(wordStr);
                 _curToken = new ValueToken(vsToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
             }
+            _ioModule->GetNextSymb();
         } else {
             RaiseError(curStrPos, curStrNum, "Не закрыта кавычка у строковой константы", 2);
-            return GetNextToken();
+            _curToken = GetNextToken();
         }
-        _ioModule->GetNextSymb();
     } else if (symb == ':') {
         curStrNum = _ioModule->GetCurStringNum();
         curStrPos = _ioModule->GetCurSymbNum();
@@ -196,11 +201,10 @@ Token* Lexer::GetNextToken() {
             curStrNum = _ioModule->GetCurStringNum();
             curStrPos = _ioModule->GetCurSymbNum();
             RaiseError(curStrPos, curStrNum, "Незакрытый комментарий", 4);
-            return GetNextToken();
         } else {
             _ioModule->GetNextSymb();
-            _curToken = GetNextToken();
         }
+        _curToken = GetNextToken();
     } else if (symb == '<') {
         curStrNum = _ioModule->GetCurStringNum();
         curStrPos = _ioModule->GetCurSymbNum();
@@ -237,6 +241,7 @@ Token* Lexer::GetNextToken() {
         futureChar = _ioModule->CheckNextRange(1)[0];
         if (IsDigit(futureChar)) {
             bool haveDot = false;
+            bool raiseError = false;
             word.push_back(symb);
             symb = _ioModule->GetNextSymb();
             while (!_ioModule->IsEnd() && IsDigit(symb) || symb == '.') {
@@ -249,24 +254,27 @@ Token* Lexer::GetNextToken() {
                         curStrNum = _ioModule->GetCurStringNum();
                         curStrPos = _ioModule->GetCurSymbNum();
                         RaiseError(curStrPos, curStrNum, "Несколько точек в определении числа", 1);
-                        return GetNextToken();
+                        raiseError = true;
+                        _curToken = GetNextToken();
                     }
                 }
                 if (IsDigit(symb)) {
                     word.push_back(symb);
                 }
             }
-            string wordStr(word.begin(), word.end());
-            curStrNum = _ioModule->GetCurStringNum();
-            curStrPos = _ioModule->GetCurSymbNum();
-            if (haveDot) {
-                double dVal = std::stod(wordStr);
-                auto vdToken = new DoubleValue(dVal);
-                _curToken = new ValueToken(vdToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
-            } else {
-                int iVal = stoi(wordStr);
-                auto viToken = new IntValue(iVal);
-                _curToken = new ValueToken(viToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+            if (!raiseError) {
+                string wordStr(word.begin(), word.end());
+                curStrNum = _ioModule->GetCurStringNum();
+                curStrPos = _ioModule->GetCurSymbNum();
+                if (haveDot) {
+                    double dVal = std::stod(wordStr);
+                    auto vdToken = new DoubleValue(dVal);
+                    _curToken = new ValueToken(vdToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+                } else {
+                    int iVal = stoi(wordStr);
+                    auto viToken = new IntValue(iVal);
+                    _curToken = new ValueToken(viToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+                }
             }
         } else {
             auto sToken = new Operator("-", _symbMap["-"]);
@@ -282,12 +290,12 @@ Token* Lexer::GetNextToken() {
         if (it != _symbMap.end()) {
             auto sToken = new Operator(str, _symbMap[str]);
             _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
+            _ioModule->GetNextSymb();
         } else {
             RaiseError(curStrPos, curStrNum, "Неопознанный символ: '" + str + "'", 3);
             _ioModule->GetNextSymb();
-            return GetNextToken();
+            _curToken = GetNextToken();
         }
-        _ioModule->GetNextSymb();
 	}
 
     return _curToken;

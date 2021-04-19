@@ -23,8 +23,10 @@ class Syntax {
 private:
 	Lexer* _lexer;
 	IOModule* _ioModule;
-	vector<Token> _idents;
+	vector<IdentificatorToken*> _idents;
 	vector<Error> _errors;
+	bool CheckIdents(IdentificatorToken*);
+	void SkipConsts(Token*, IdentificatorToken*, Identificator*);
 public:
 	Syntax(string, string);
 	~Syntax();
