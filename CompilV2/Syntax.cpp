@@ -2,10 +2,12 @@
 
 
 Syntax::Syntax(string fIn, string fOut) {
-	_lexer = new Lexer(fIn, fOut);
+	_ioModule = new IOModule(fIn, fOut);
+	_lexer = new Lexer(_ioModule);
 }
 
 Syntax::~Syntax() {
+	delete _ioModule;
 	delete _lexer;
 }
 
@@ -13,19 +15,112 @@ Lexer* Syntax::GetLexer() {
 	return _lexer;
 }
 
+void Syntax::RaiseError(int pos, int strNum, string reason, int code) {
+	auto error = Error(strNum + 1, pos + 1, reason, code);
+	_errors.push_back(error);
+}
+
+void Syntax::PrintErrors() {
+	_ioModule->PrintErrors(_errors);
+}
+
 // <программа>::=program <имя>; <блок>.
 void Syntax::BNFProg() {
-	
+	IdentificatorToken* identToken;
+	OperatorToken* operToken;
+	ValueToken* valToken;
+
+	Identificator* ident;
+	Operator* oper;
+	Value* val;
+
+	auto token = _lexer->GetNextToken();
+	if (token->GetType() == TokenType::IDENTIFICATOR) {
+		identToken = (IdentificatorToken*)token;
+		ident = identToken->GetValue();
+		if (ident->GetName() == "program") {
+			token = _lexer->GetNextToken();
+			if (token->GetType() == TokenType::IDENTIFICATOR) {
+				identToken = (IdentificatorToken*)token;
+				ident = identToken->GetValue();
+				token = _lexer->GetNextToken();
+				if (token->GetType() == TokenType::OPERATOR) {
+					operToken = (OperatorToken*)token;
+					oper = operToken->GetValue();
+					if (oper->GetSymb() != ";") {
+						RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закончено определение программы", 13);
+					}
+				} else {
+					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закончено определение программы", 13);
+				}
+			} else {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не задано имя программы", 12);
+			}
+		} else {
+			RaiseError(0, 0, "Не найдено определение программы", 11);
+		}
+	} else {
+		RaiseError(0, 0, "Не найдено определение программы", 11);
+	}
+	BNFBlock();
 }
 
 // <блок>::=<раздел констант><раздел типов><раздел переменных><раздел операторов>
 void Syntax::BNFBlock() {
-	
+	IdentificatorToken* identToken;
+	OperatorToken* operToken;
+	ValueToken* valToken;
+
+	Identificator* ident;
+	Operator* oper;
+	Value* val;
+
+	auto token = _lexer->GetNextToken();
+	if (token->GetType() == TokenType::IDENTIFICATOR) {
+		identToken = (IdentificatorToken*)token;
+		ident = identToken->GetValue();
+		if (ident->GetName() == "const") {
+			BNFConsts();
+			token = _lexer->GetCurToken();
+		}
+		if (token->GetType() == TokenType::IDENTIFICATOR) {
+			identToken = (IdentificatorToken*)token;
+			ident = identToken->GetValue();
+			if (ident->GetName() == "type") {
+				BNFTypes();
+				token = _lexer->GetCurToken();
+			} 
+			if (token->GetType() == TokenType::IDENTIFICATOR) {
+				identToken = (IdentificatorToken*)token;
+				ident = identToken->GetValue();
+				if (ident->GetName() == "var") {
+					BNFVariants();
+					token = _lexer->GetCurToken();
+				}
+				if (token->GetType() == TokenType::IDENTIFICATOR) {
+					identToken = (IdentificatorToken*)token;
+					ident = identToken->GetValue();
+					if (ident->GetName() != "begin") {
+						RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
+					}
+				} else {
+					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
+				}
+			} else {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
+			}
+		} else {
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
+		}
+	} else {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определены блоки", 14);
+	}
+	BNFOpers();
 }
 
 // <раздел констант>::=<пусто>|const <определение константы>; {<определение константы>;}
 void Syntax::BNFConsts() {
-
+	
 }
 
 // <раздел типов>::=<пусто>|type <определение типа>; {<определение типа>;}
@@ -185,16 +280,6 @@ void Syntax::BNFFuncName() {
 
 // <фактический параметр>::=<выражение>|<переменная>|<имя процедуры> | <имя функции>
 void Syntax::BNFFactParam() {
-
-}
-
-// <пустой оператор>::=<пусто>
-void Syntax::BNFEmptyOper() {
-
-}
-
-// <пусто>::=
-void Syntax::BNFEmpty() {
 
 }
 

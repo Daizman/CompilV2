@@ -2,8 +2,8 @@
 #include "Lexer.hpp"
 
 
-Lexer::Lexer(string iPath, string oPath) {
-	_ioModule = new IOModule(iPath, oPath);
+Lexer::Lexer(IOModule* ioModule) {
+    _ioModule = ioModule;
     if (_ioModule->GetCurSymb() == 'ï') {
         _ioModule->SkipSymb();
         if (_ioModule->GetCurSymb() == '»') {

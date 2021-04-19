@@ -18,7 +18,7 @@ private:
 	bool IsCharacter(char);
 	bool IsDigit(char);
 public:
-	Lexer(string, string);
+	Lexer(IOModule*);
 	~Lexer();
 	Token* GetNextToken();
 	Token* GetCurToken();

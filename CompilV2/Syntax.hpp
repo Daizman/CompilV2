@@ -22,11 +22,15 @@
 class Syntax {
 private:
 	Lexer* _lexer;
+	IOModule* _ioModule;
 	vector<Token> _idents;
+	vector<Error> _errors;
 public:
 	Syntax(string, string);
 	~Syntax();
 	Lexer* GetLexer();
+	void PrintErrors();
+	void RaiseError(int, int, string, int);
 	void BNFProg();
 	void BNFBlock();
 	void BNFConsts();
