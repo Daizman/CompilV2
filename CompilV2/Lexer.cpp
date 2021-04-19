@@ -215,7 +215,7 @@ Token* Lexer::GetNextToken() {
             _ioModule->GetNextSymb();
         } else {
             auto sToken = new Operator("<", _symbMap["<"]);
-            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 2, curStrPos);
+            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
         }
         _ioModule->GetNextSymb();
     } else if (symb == '>') {
@@ -228,9 +228,51 @@ Token* Lexer::GetNextToken() {
             _ioModule->GetNextSymb();
         } else {
             auto sToken = new Operator(">", _symbMap[">"]);
-            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 2, curStrPos);
+            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
         }
         _ioModule->GetNextSymb();
+    } else if (symb == '-') {
+        curStrNum = _ioModule->GetCurStringNum();
+        curStrPos = _ioModule->GetCurSymbNum();
+        futureChar = _ioModule->CheckNextRange(1)[0];
+        if (IsDigit(futureChar)) {
+            bool haveDot = false;
+            word.push_back(symb);
+            symb = _ioModule->GetNextSymb();
+            while (!_ioModule->IsEnd() && IsDigit(symb) || symb == '.') {
+                symb = _ioModule->GetNextSymb();
+                if (symb == '.') {
+                    if (!haveDot) {
+                        haveDot = true;
+                        word.push_back(',');
+                    } else {
+                        curStrNum = _ioModule->GetCurStringNum();
+                        curStrPos = _ioModule->GetCurSymbNum();
+                        RaiseError(curStrPos, curStrNum, "Ќесколько точек в определении числа", 1);
+                        return GetNextToken();
+                    }
+                }
+                if (IsDigit(symb)) {
+                    word.push_back(symb);
+                }
+            }
+            string wordStr(word.begin(), word.end());
+            curStrNum = _ioModule->GetCurStringNum();
+            curStrPos = _ioModule->GetCurSymbNum();
+            if (haveDot) {
+                double dVal = std::stod(wordStr);
+                auto vdToken = new DoubleValue(dVal);
+                _curToken = new ValueToken(vdToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+            } else {
+                int iVal = stoi(wordStr);
+                auto viToken = new IntValue(iVal);
+                _curToken = new ValueToken(viToken, curStrNum, curStrPos - wordStr.length(), curStrPos);
+            }
+        } else {
+            auto sToken = new Operator("-", _symbMap["-"]);
+            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
+            _ioModule->GetNextSymb();
+        }
     } else {
         curStrNum = _ioModule->GetCurStringNum();
         curStrPos = _ioModule->GetCurSymbNum();

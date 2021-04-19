@@ -54,6 +54,9 @@
     <ClCompile Include="Lexer.cpp">
       <Filter>Исходные файлы\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Syntax.cpp">
+      <Filter>Исходные файлы\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="testInput1.txt">
@@ -89,6 +92,9 @@
       <Filter>Файлы заголовков\Modules</Filter>
     </ClInclude>
     <ClInclude Include="Lexer.hpp">
+      <Filter>Файлы заголовков\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Syntax.hpp">
       <Filter>Файлы заголовков\Modules</Filter>
     </ClInclude>
   </ItemGroup>
