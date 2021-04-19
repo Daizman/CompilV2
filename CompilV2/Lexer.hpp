@@ -6,12 +6,14 @@
 using std::map;
 using std::stod;
 using std::stoi;
+using std::atof;
 
 
 class Lexer {
 private:
 	IOModule* _ioModule;
 	Token* _curToken;
+	vector<Error> _errors;
 	map<string, OperatorType> _symbMap;
 	bool IsCharacter(char);
 	bool IsDigit(char);
@@ -20,6 +22,7 @@ public:
 	~Lexer();
 	Token* GetNextToken();
 	Token* GetCurToken();
-	Error* RaiseError(int, Token*);
+	void PrintErrors();
+	void RaiseError(int, int, string, int);
 };
 

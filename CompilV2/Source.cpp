@@ -3,12 +3,12 @@
 
 int main() {
 	setlocale(LC_ALL, "Russian");
-	auto lexer = new Lexer("testInput1.txt", "output");
+	//auto lexer = new Lexer("testInput1.txt", "output");
+	//auto lexer = new Lexer("test1.pas", "output");
+	auto lexer = new Lexer("errors.pas", "output");
 	while (lexer->GetNextToken() != NULL) {
 		cout << lexer->GetCurToken()->ToString();
-		if (lexer->GetCurToken()->ToString() == "Identificator: end\n") {
-			int stop = 1;
-		}
 	}
+	lexer->PrintErrors();
 	return 0;
 }

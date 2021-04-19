@@ -163,6 +163,10 @@
     <ClInclude Include="OperatorType.hpp" />
     <ClInclude Include="TokenType.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="errors.pas" />
+    <None Include="test1.pas" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

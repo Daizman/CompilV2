@@ -27,8 +27,8 @@ int Error::GetCode() {
 string Error::ToString() {
 	string errorText = "";
 	errorText += "Ошибка в строке " + to_string(_strNum);
-	errorText += " на позиции " + to_string(_pos);
-	errorText += " описание: " + _reason;
-	errorText += " код ошибки " + _code + '\n';
+	errorText += ", на позиции " + to_string(_pos);
+	errorText += ", код ошибки " + to_string(_code);
+	errorText += ", описание: " + _reason + ";";
 	return errorText;
 }

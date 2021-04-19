@@ -92,4 +92,12 @@
       <Filter>Файлы заголовков\Modules</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="test1.pas">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+    <None Include="errors.pas">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+  </ItemGroup>
 </Project>

@@ -56,12 +56,10 @@ void IOModule::WriteNext() {
 
 }
 
-void IOModule::PrintListing() {
-
-}
-
-void IOModule::RaiseError(Error error) {
-
+void IOModule::PrintErrors(vector<Error> errors) {
+	for (auto er : errors) {
+		cout << er.ToString() << endl;
+	}
 }
 
 void IOModule::SkipSymb() {
@@ -71,12 +69,16 @@ void IOModule::SkipSymb() {
 
 void IOModule::SkipSpaces() {
 	string templateStr = "\t\n ";
-	while (!_input.eof() && _curSymbNum < _curString.length() && templateStr.find(_curString[_curSymbNum]) != string::npos) {
+	bool thisIsComment = false;
+	while (!_input.eof() && _curSymbNum < _curString.length() && templateStr.find(_curString[_curSymbNum]) != string::npos || thisIsComment) {
 		_curSymbNum++;
 		if (_curString.length() == _curSymbNum) {
 			getline(_input, _curString);
 			_curStringNum++;
 			_curSymbNum = 0;
+		}
+		if (_curString.length() >= 2) {
+			thisIsComment = _curString[0] == '/' && _curString[1] == '/';
 		}
 	}
 	if (!_input.eof()) {

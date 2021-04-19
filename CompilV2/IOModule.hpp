@@ -14,6 +14,7 @@ using std::string;
 using std::vector;
 using std::to_string;
 using std::cout;
+using std::endl;
 using std::ifstream;
 using std::ofstream;
 
@@ -35,7 +36,6 @@ public:
 	void SkipSymb();
 	void SkipSpaces();
 	void WriteNext();
-	void PrintListing();
 	void OpenInput();
 	void CloseInput();
 	void OpenOutput();
@@ -45,7 +45,7 @@ public:
 	string GetCurString();
 	char GetCurSymb();
 	bool IsEnd();
-	void RaiseError(Error);
+	void PrintErrors(vector<Error>);
 	IOModule(string, string);
 	~IOModule();
 };
