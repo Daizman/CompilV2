@@ -175,6 +175,70 @@ void Lexer::ColonHandler(char symb) {
     }
 }
 
+void Lexer::MoreHandler(char symb) {
+    char futureChar = _ioModule->CheckNext();
+    int curStrNum = _ioModule->GetCurStringNum();
+    int curStrPos = _ioModule->GetCurSymbNum();
+
+    if (futureChar == '=') {
+        auto sToken = new Operator(">=", _symbMap[">="]);
+        _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 2, curStrPos);
+        _ioModule->GetNextSymb();
+    } else {
+        auto sToken = new Operator(">", _symbMap[">"]);
+        _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
+    }
+}
+
+void Lexer::LowerHandler(char symb) {
+    char futureChar = _ioModule->CheckNext();
+    int curStrNum = _ioModule->GetCurStringNum();
+    int curStrPos = _ioModule->GetCurSymbNum();
+
+    if (futureChar == '>') {
+        auto sToken = new Operator("<>", _symbMap["<>"]);
+        _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 2, curStrPos);
+        _ioModule->GetNextSymb();
+    } else if (futureChar == '=') {
+        auto sToken = new Operator("<=", _symbMap["<="]);
+        _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 2, curStrPos);
+        _ioModule->GetNextSymb();
+    } else {
+        auto sToken = new Operator("<", _symbMap["<"]);
+        _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
+    }
+}
+
+void Lexer::LongCommHandler(char symb) {
+    int curStrNum, curStrPos;
+
+    while (!_ioModule->IsEnd() && symb != '}') {
+        symb = _ioModule->GetNextSymb();
+    }
+    if (_ioModule->IsEnd()) {
+        curStrNum = _ioModule->GetCurStringNum();
+        curStrPos = _ioModule->GetCurSymbNum();
+        RaiseError(curStrPos, curStrNum, "Незакрытый комментарий", 4);
+    } else {
+        _ioModule->GetNextSymb();
+    }
+    _curToken = GetNextToken();
+}
+
+void Lexer::OtherSymbHandler(char symb) {
+    int curStrNum = _ioModule->GetCurStringNum();
+    int curStrPos = _ioModule->GetCurSymbNum();
+
+    string str = string(1, symb);
+    auto it = _symbMap.find(str);
+    if (it != _symbMap.end()) {
+        auto sToken = new Operator(str, _symbMap[str]);
+        _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
+    } else {
+        RaiseError(curStrPos, curStrNum, "Неопознанный символ: '" + str + "'", 3);
+    }
+}
+
 Token* Lexer::GetNextToken() {
 	char symb = _ioModule->GetCurSymb();
     int curStrNum, curStrPos;
@@ -217,46 +281,12 @@ Token* Lexer::GetNextToken() {
         _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 2, curStrPos);
         _ioModule->GetNextSymb();
     } else if (symb == '{') {
-        while (!_ioModule->IsEnd() && symb != '}') {
-            symb = _ioModule->GetNextSymb();
-        }
-        if (_ioModule->IsEnd()) {
-            curStrNum = _ioModule->GetCurStringNum();
-            curStrPos = _ioModule->GetCurSymbNum();
-            RaiseError(curStrPos, curStrNum, "Незакрытый комментарий", 4);
-        } else {
-            _ioModule->GetNextSymb();
-        }
-        _curToken = GetNextToken();
+        LongCommHandler(symb);
     } else if (symb == '<') {
-        curStrNum = _ioModule->GetCurStringNum();
-        curStrPos = _ioModule->GetCurSymbNum();
-        futureChar = _ioModule->CheckNext();
-        if (futureChar == '>') {
-            auto sToken = new Operator("<>", _symbMap["<>"]);
-            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 2, curStrPos);
-            _ioModule->GetNextSymb();
-        } else if (futureChar == '=') {
-            auto sToken = new Operator("<=", _symbMap["<="]);
-            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 2, curStrPos);
-            _ioModule->GetNextSymb();
-        } else {
-            auto sToken = new Operator("<", _symbMap["<"]);
-            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
-        }
+        LowerHandler(symb);
         _ioModule->GetNextSymb();
     } else if (symb == '>') {
-        curStrNum = _ioModule->GetCurStringNum();
-        curStrPos = _ioModule->GetCurSymbNum();
-        futureChar = _ioModule->CheckNext();
-        if (futureChar == '=') {
-            auto sToken = new Operator(">=", _symbMap[">="]);
-            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 2, curStrPos);
-            _ioModule->GetNextSymb();
-        } else {
-            auto sToken = new Operator(">", _symbMap[">"]);
-            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
-        }
+        MoreHandler(symb);
         _ioModule->GetNextSymb();
     } else if (symb == '-') {
         auto _oldToken = _curToken;
@@ -266,19 +296,13 @@ Token* Lexer::GetNextToken() {
         }
         _ioModule->GetNextSymb();
     } else {
-        curStrNum = _ioModule->GetCurStringNum();
-        curStrPos = _ioModule->GetCurSymbNum();
-        
-        string str = string(1, symb);
-        auto it = _symbMap.find(str);
-        if (it != _symbMap.end()) {
-            auto sToken = new Operator(str, _symbMap[str]);
-            _curToken = new OperatorToken(sToken, curStrNum, curStrPos - 1, curStrPos);
-            _ioModule->GetNextSymb();
-        } else {
-            RaiseError(curStrPos, curStrNum, "Неопознанный символ: '" + str + "'", 3);
+        auto _oldToken = _curToken;
+        OtherSymbHandler(symb);
+        if (_oldToken == _curToken) {
             _ioModule->GetNextSymb();
             _curToken = GetNextToken();
+        } else {
+            _ioModule->GetNextSymb();
         }
 	}
 

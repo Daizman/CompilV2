@@ -21,6 +21,10 @@ private:
 	void DigitTokenHandler(char);
 	void StringTokenHandler(char);
 	void ColonHandler(char);
+	void MoreHandler(char);
+	void LowerHandler(char);
+	void LongCommHandler(char);
+	void OtherSymbHandler(char);
 public:
 	Lexer(IOModule*);
 	~Lexer();

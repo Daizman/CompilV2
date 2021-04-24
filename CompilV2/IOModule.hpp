@@ -30,12 +30,12 @@ private:
 	string _curString;
 	char _curSymb;
 	bool _isEnd;
+	void Skip();
 public:
 	char GetNextSymb();
 	string CheckNextRange(int);
 	char CheckNext();
 	void SkipSymb();
-	void Skip();
 	void WriteNext();
 	void OpenInput();
 	void CloseInput();
