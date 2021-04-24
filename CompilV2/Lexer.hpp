@@ -17,6 +17,10 @@ private:
 	map<string, OperatorType> _symbMap;
 	bool IsCharacter(char);
 	bool IsDigit(char);
+	void CharacterTokenHandler(char);
+	void DigitTokenHandler(char);
+	void StringTokenHandler(char);
+	void ColonHandler(char);
 public:
 	Lexer(IOModule*);
 	~Lexer();

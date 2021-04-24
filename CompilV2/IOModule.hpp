@@ -33,8 +33,9 @@ private:
 public:
 	char GetNextSymb();
 	string CheckNextRange(int);
+	char CheckNext();
 	void SkipSymb();
-	void SkipSpaces();
+	void Skip();
 	void WriteNext();
 	void OpenInput();
 	void CloseInput();

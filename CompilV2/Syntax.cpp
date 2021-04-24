@@ -35,7 +35,7 @@ bool Syntax::CheckIdents(IdentificatorToken* token) {
 
 void Syntax::SkipConsts(Token* token, IdentificatorToken* identToken, Identificator* ident) {
 	_idents.clear();
-	while (!_ioModule->IsEnd() && ident->GetName() != "type" && ident->GetName() != "var" && ident->GetName() != "begin") {
+	while (!_ioModule->IsEnd() && ident->GetName() != "var" && ident->GetName() != "begin") {
 		token = _lexer->GetNextToken();
 		while (!_ioModule->IsEnd() && token->GetType() != TokenType::IDENTIFICATOR) {
 			token = _lexer->GetNextToken();
@@ -44,6 +44,57 @@ void Syntax::SkipConsts(Token* token, IdentificatorToken* identToken, Identifica
 			identToken = (IdentificatorToken*)token;
 			ident = identToken->GetValue();
 		}
+	}
+}
+
+void Syntax::SkipVariants(Token* token, IdentificatorToken* identToken, Identificator* ident) {
+	while (!_ioModule->IsEnd() && ident->GetName() != "begin") {
+		token = _lexer->GetNextToken();
+		while (!_ioModule->IsEnd() && token->GetType() != TokenType::IDENTIFICATOR) {
+			token = _lexer->GetNextToken();
+		}
+		if (token->GetType() == TokenType::IDENTIFICATOR) {
+			identToken = (IdentificatorToken*)token;
+			ident = identToken->GetValue();
+		}
+	}
+}
+
+void Syntax::CheckEndVariants(vector<IdentificatorToken*> _addedIdents) {
+	auto tToken = _lexer->GetNextToken();
+	if (tToken->GetType() == TokenType::IDENTIFICATOR) {
+		auto tIdentToken = (IdentificatorToken*)tToken;
+		auto tIdent = tIdentToken->GetValue();
+		if (tIdent->GetName() == "integer" || tIdent->GetName() == "real" || tIdent->GetName() == "string" || tIdent->GetName() == "char") {
+			auto endToken = _lexer->GetNextToken();
+			if (endToken->GetType() == TokenType::OPERATOR) {
+				auto endOperIdentToken = (OperatorToken*)endToken;
+				auto endOperIdent = endOperIdentToken->GetValue();
+				if (endOperIdent->GetSymb() == ";") {
+					auto toBegin = _lexer->GetNextToken();
+					if (toBegin->GetType() == TokenType::IDENTIFICATOR) {
+						auto toBeginIdentToken = (IdentificatorToken*)toBegin;
+						auto toBeginIdent = toBeginIdentToken->GetValue();
+						if (toBeginIdent->GetName() != "begin") {
+							RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
+							_addedIdents.clear();
+						}
+					}
+				} else {
+					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не закончен блок объявления переменных", 113);
+					_addedIdents.clear();
+				}
+			} else {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не закончен блок объявления переменных", 113);
+				_addedIdents.clear();
+			}
+		} else {
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не верный идентификатор типа", 112);
+			_addedIdents.clear();
+		}
+	} else {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не верный идентификатор типа", 112);
+		_addedIdents.clear();
 	}
 }
 
@@ -86,7 +137,7 @@ void Syntax::BNFProg() {
 	BNFBlock();
 }
 
-// <блок>::=<раздел констант><раздел типов><раздел переменных><раздел операторов>
+// <блок>::=<раздел констант><раздел переменных><раздел операторов>
 void Syntax::BNFBlock() {
 	IdentificatorToken* identToken;
 	Identificator* ident;
@@ -102,24 +153,14 @@ void Syntax::BNFBlock() {
 		if (token->GetType() == TokenType::IDENTIFICATOR) {
 			identToken = (IdentificatorToken*)token;
 			ident = identToken->GetValue();
-			if (ident->GetName() == "type") {
-				BNFTypes();
+			if (ident->GetName() == "var") {
+				BNFVariants();
 				token = _lexer->GetCurToken();
-			} 
+			}
 			if (token->GetType() == TokenType::IDENTIFICATOR) {
 				identToken = (IdentificatorToken*)token;
 				ident = identToken->GetValue();
-				if (ident->GetName() == "var") {
-					BNFVariants();
-					token = _lexer->GetCurToken();
-				}
-				if (token->GetType() == TokenType::IDENTIFICATOR) {
-					identToken = (IdentificatorToken*)token;
-					ident = identToken->GetValue();
-					if (ident->GetName() != "begin") {
-						RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
-					}
-				} else {
+				if (ident->GetName() != "begin") {
 					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
 				}
 			} else {
@@ -136,7 +177,7 @@ void Syntax::BNFBlock() {
 
 // <раздел констант>::=<пусто>|const <определение константы>; {<определение константы>;}
 void Syntax::BNFConsts() {
-	//если не было const, не попадем
+	// если не было const, не попадем
 	IdentificatorToken* identToken;
 	OperatorToken* operToken;
 
@@ -147,7 +188,7 @@ void Syntax::BNFConsts() {
 	if (token->GetType() == TokenType::IDENTIFICATOR) {
 		identToken = (IdentificatorToken*)token;
 		ident = identToken->GetValue();
-		while (!_ioModule->IsEnd() && ident->GetName() != "type" && ident->GetName() != "var" && ident->GetName() != "begin") {
+		while (!_ioModule->IsEnd() && ident->GetName() != "var" && ident->GetName() != "begin") {
 			BNFConstDif();
 			token = _lexer->GetNextToken();
 			if (token->GetType() == TokenType::OPERATOR) {
@@ -176,14 +217,23 @@ void Syntax::BNFConsts() {
 	}
 }
 
-// <раздел типов>::=<пусто>|type <определение типа>; {<определение типа>;}
-void Syntax::BNFTypes() {
-
-}
-
 // <раздел переменных>::=var <описание однотипных переменных>;{<описание однотипных переменных>;} | <пусто>
 void Syntax::BNFVariants() {
+	// если не было var, не попадем
+	IdentificatorToken* identToken;
+	OperatorToken* operToken;
 
+	Identificator* ident;
+	Operator* oper;
+
+	auto token = _lexer->GetNextToken();
+	if (token->GetType() == TokenType::IDENTIFICATOR) {
+		identToken = (IdentificatorToken*)token;
+		ident = identToken->GetValue();
+		BNFSingleTypeVariants();
+	} else {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указано имя переменной", 110);
+	}
 }
 
 // <раздел операторов>::=<составной оператор>
@@ -232,39 +282,58 @@ void Syntax::BNFConstDif() {
 	}
 }
 
-// <определение типа>::=<имя>=<тип>
-void Syntax::BNFTypeDif() {
-	
-}
-
-// <тип>::=<простой тип>
-void Syntax::BNFType() {
-	
-}
-
-// <простой тип>::=<перечислимый тип>|<ограниченный тип>|<имя типа>
-void Syntax::BNFSimpleType() {
-
-}
-
-// <перечислимый тип>::=(<имя>{,<имя>})
-void Syntax::BNFEnumType() {
-
-}
-
-// <ограниченный тип>::=<константа>..<константа>
-void Syntax::BNFGroundedType() {
-	
-}
-
-// <имя типа>::=<имя>
-void Syntax::BNFTypeName() {
-	
-}
-
 // <описание однотипных переменных>::=<имя>{,<имя>}:<тип>
 void Syntax::BNFSingleTypeVariants() {
-	
+	IdentificatorToken* identToken;
+	OperatorToken* operToken;
+	ValueToken* valToken;
+
+	Identificator* ident;
+	Operator* oper;
+	Value* val;
+
+	auto token = _lexer->GetCurToken();
+	identToken = (IdentificatorToken*)token;
+	ident = identToken->GetValue();
+
+	vector<IdentificatorToken*> addedIdents;
+
+	auto dToken = _lexer->GetNextToken();
+	if (dToken->GetType() == TokenType::OPERATOR) {
+		operToken = (OperatorToken*)dToken;
+		oper = operToken->GetValue();
+		while (!_ioModule->IsEnd() && oper->GetSymb() != ":") {
+			token = _lexer->GetNextToken();
+			if (token->GetType() == TokenType::IDENTIFICATOR) {
+				identToken = (IdentificatorToken*)token;
+				ident = identToken->GetValue();
+				addedIdents.push_back(identToken);
+				dToken = _lexer->GetNextToken();
+				if (dToken->GetType() == TokenType::OPERATOR) {
+					operToken = (OperatorToken*)dToken;
+					oper = operToken->GetValue();
+					if (oper->GetSymb() != ":" || oper->GetSymb() != ",") {
+						SkipVariants(token, identToken, ident);
+						RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление переменной", 111);
+						addedIdents.clear();
+					}
+				}
+			} else {
+				SkipVariants(token, identToken, ident);
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление переменной", 111);
+				addedIdents.clear();
+			}
+		}
+		if (oper->GetSymb() != ":") {
+			CheckEndVariants(addedIdents);
+		}
+	} else {
+		SkipVariants(token, identToken, ident);
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление переменной", 111);
+	}
+	for (auto id : addedIdents) {
+		_idents.push_back(id);
+	}
 }
 
 // <составной оператор>::= begin <оператор>{;<оператор>} end
@@ -277,12 +346,12 @@ void Syntax::BNFOper() {
 
 }
 
-// <непомеченный оператор>::=<простой оператор>|<сложный оператор>
+// <непомеченный оператор>::=<простой оператор>
 void Syntax::BNFNotMarkedOper() {
 
 }
 
-// <простой оператор>::=<оператор присваивания>|<оператор процедуры>|<пустой оператор>
+// <простой оператор>::=<оператор присваивания>|<пустой оператор>
 void Syntax::BNFSimpleOper() {
 
 }
@@ -307,23 +376,8 @@ void Syntax::BNFVarName() {
 
 }
 
-// <указанная переменная>::=<переменная-ссылка>
-void Syntax::BNFPointedVar() {
-	
-}
-
-// <переменная-ссылка>::=<переменная>
-void Syntax::BNFPointerVar() {
-	
-}
-
-// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
+// <выражение>::=<простое выражение>
 void Syntax::BNFExpres() {
-	
-}
-
-// <операция отношения>::==|<>|<|<=|>=|>|in
-void Syntax::BNFComperExpr() {
 	
 }
 
@@ -347,62 +401,7 @@ void Syntax::BNFMultOper() {
 
 }
 
-// <множитель>::=<переменная>|<константа без знака>|(<выражение>) | <обозначение функции> | <множество> | not <множитель>
+// <множитель>::=<переменная>|<константа без знака>|(<выражение>)
 void Syntax::BNFMultiplier() {
-
-}
-
-// <обозначение функции>::=<имя функции>|<имя функции>(<фактический параметр>{, <фактический параметр>})
-void Syntax::BNFFuncDif() {
-
-}
-
-// <имя функции>::=<имя>
-void Syntax::BNFFuncName() {
-	
-}
-
-// <фактический параметр>::=<выражение>|<переменная>|<имя процедуры> | <имя функции>
-void Syntax::BNFFactParam() {
-
-}
-
-// <множество>::=[<список элементов>]
-void Syntax::BNFSet() {
-
-}
-
-// <список элементов>:: = <элемент>{ ,<элемент> } | <пусто>
-void Syntax::BNFElemsList() {
-
-}
-
-// <элемент>:: = <выражение> | <выражение>..<выражение>
-void Syntax::BNFElement() {
-
-}
-
-// <имя процедуры>::=<имя>
-void Syntax::BNFProcName() {
-
-}
-
-// <оператор процедуры>::=<имя процедуры>|<имя процедуры>(<фактический параметр>{, <фактический параметр>})
-void Syntax::BNFProcOper() {
-
-}
-
-// <сложный оператор>::=<составной оператор>|<выбирающий оператор>
-void Syntax::BNFBigOper() {
-	
-}
-
-// <выбирающий оператор>::=<условный оператор>
-void Syntax::BNFChooseOper() {
-	
-}
-
-// <условный оператор>::= if <выражение> then <оператор>|if <выражение> then <оператор> else <оператор>
-void Syntax::BNFIfOper() {
 
 }

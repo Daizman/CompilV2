@@ -105,5 +105,14 @@
     <None Include="errors.pas">
       <Filter>Файлы ресурсов</Filter>
     </None>
+    <None Include="constTest.pas">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+    <None Include="constAndVars.pas">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+    <None Include="varsTest.pas">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
   </ItemGroup>
 </Project>

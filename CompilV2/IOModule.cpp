@@ -9,15 +9,11 @@ char IOModule::GetNextSymb() {
 			_curSymb = '\0';
 			return _curSymb;
 		}
-		string oldStr = _curString;
-		SkipSpaces();
-		if (oldStr == _curString) {
-			getline(_input, _curString);
-			_curStringNum++;
-		}
+		getline(_input, _curString);
+		_curStringNum++;
 		_curSymbNum = 0;
-	}
-	else {
+		Skip();
+	} else {
 		_curSymbNum++;
 	}
 	_curSymb = _curString[_curSymbNum];
@@ -52,6 +48,13 @@ string IOModule::CheckNextRange(int range) {
 	return _curString.substr(_curSymbNum + 1, range);
 }
 
+char IOModule::CheckNext() {
+	if (_curSymbNum + 1 >= _curString.length()) {
+		return '\n';
+	}
+	return _curString[_curSymbNum + 1];
+}
+
 void IOModule::WriteNext() {
 
 }
@@ -67,22 +70,23 @@ void IOModule::SkipSymb() {
 	_curSymb = _curString[_curSymbNum];
 }
 
-void IOModule::SkipSpaces() {
-	string templateStr = "\t\n ";
-	bool thisIsComment = false;
-	while (!_input.eof() && _curSymbNum < _curString.length() && templateStr.find(_curString[_curSymbNum]) != string::npos || thisIsComment) {
+void IOModule::Skip() {
+	string symbToSkip = "\t\n﻿ ";
+	int curStringLen = _curString.length();
+	bool thisIsComment = curStringLen >= 2 && _curString[0] == '/' && _curString[1] == '/';
+
+	while (!_input.eof() && (_curSymbNum < curStringLen && symbToSkip.find(_curString[_curSymbNum]) != string::npos || thisIsComment)) {
 		_curSymbNum++;
-		if (_curString.length() == _curSymbNum) {
+		if (curStringLen == _curSymbNum) {
 			getline(_input, _curString);
 			_curStringNum++;
 			_curSymbNum = 0;
-		}
-		if (_curString.length() >= 2) {
-			thisIsComment = _curString[0] == '/' && _curString[1] == '/';
+			thisIsComment = curStringLen >= 2 && _curString[0] == '/' && _curString[1] == '/';
+			curStringLen = _curString.length();
 		}
 	}
-	if (!_input.eof()) {
-		_curSymb = _curString[_curSymbNum];
+	if (_input.eof() && _curString[_curSymbNum] == '\0') {
+		_isEnd = true;
 	}
 }
 
@@ -116,9 +120,8 @@ IOModule::IOModule(string iPath, string oPath) {
 	_curStringNum = 0;
 	_curSymbNum = 0;
 	OpenInput();
-	SkipSpaces();
 	getline(_input, _curString);
-	SkipSpaces();
+	Skip();
 	_curSymb = _curString[_curSymbNum];
 }
 

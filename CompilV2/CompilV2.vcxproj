@@ -166,8 +166,11 @@
     <ClInclude Include="TokenType.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="constAndVars.pas" />
+    <None Include="constTest.pas" />
     <None Include="errors.pas" />
     <None Include="test1.pas" />
+    <None Include="varsTest.pas" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

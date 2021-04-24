@@ -46,7 +46,7 @@ CharValue::CharValue(char val) :Value(ValueType::CHARACTER) {
 }
 
 string CharValue::ToString() {
-	return "Value: " + string(1, _val) + "\n";
+	return "Value: '" + string(1, _val) + "'\n";
 }
 
 char CharValue::GetValue() {
@@ -59,7 +59,7 @@ StringValue::StringValue(string val) :Value(ValueType::STRING) {
 }
 
 string StringValue::ToString() {
-	return "Value: " + _val + "\n";
+	return "Value: '" + _val + "'\n";
 }
 
 string StringValue::GetValue() {
