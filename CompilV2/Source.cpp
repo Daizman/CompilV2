@@ -8,8 +8,8 @@ void syntTest();
 int main() {
 	setlocale(LC_ALL, "Russian");
 	//iTest();
-	lexerTest();
-	//syntTest();
+	//lexerTest();
+	syntTest();
 	return 0;
 }
 
@@ -37,8 +37,8 @@ void lexerTest() {
 }
 
 void syntTest() {
-	//auto syntax = new Syntax("constTest.pas", "output");
-	auto syntax = new Syntax("varsTest.pas", "output");
+	auto syntax = new Syntax("constTest.pas", "output");
+	//auto syntax = new Syntax("varsTest.pas", "output");
 	//auto syntax = new Syntax("constAndVars.pas", "output");
 	syntax->BNFProg();
 	syntax->PrintErrors();

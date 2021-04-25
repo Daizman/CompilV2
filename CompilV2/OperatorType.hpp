@@ -41,5 +41,8 @@ enum class OperatorType {
     THENSY,
     UNTILSY,
     DOSY,
-    IFSY
+    IFSY,
+    BEGIN,
+    END,
+    PROGRAM
 };

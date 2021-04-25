@@ -45,6 +45,9 @@ Lexer::Lexer(IOModule* ioModule) {
     _symbMap["until"] = OperatorType::UNTILSY;
     _symbMap["do"] = OperatorType::DOSY;
     _symbMap["if"] = OperatorType::IFSY;
+    _symbMap["begin"] = OperatorType::BEGIN;
+    _symbMap["end"] = OperatorType::END;
+    _symbMap["program"] = OperatorType::PROGRAM;
 }
 
 Lexer::~Lexer() {
@@ -250,6 +253,10 @@ Token* Lexer::GetNextToken() {
     
     while(symb == ' ') {
         symb = _ioModule->GetNextSymb();
+    }
+
+    if (_curToken != NULL) {
+        delete _curToken;
     }
 
 	if (IsCharacter(symb)) {

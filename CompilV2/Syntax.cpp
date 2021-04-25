@@ -4,6 +4,8 @@
 Syntax::Syntax(string fIn, string fOut) {
 	_ioModule = new IOModule(fIn, fOut);
 	_lexer = new Lexer(_ioModule);
+	_curToken = NULL;
+	_progName = "";
 }
 
 Syntax::~Syntax() {
@@ -24,117 +26,168 @@ void Syntax::PrintErrors() {
 	_ioModule->PrintErrors(_errors);
 }
 
-bool Syntax::CheckIdents(IdentificatorToken* token) {
-	for (auto tok : _idents) {
-		if (tok->GetValue()->GetName() == token->GetValue()->GetName()) {
-			return true;
-		}
-	}
-	return false;
+void Syntax::NextToken() {
+	_curToken = _lexer->GetNextToken();
 }
 
-void Syntax::SkipConsts(Token* token, IdentificatorToken* identToken, Identificator* ident) {
-	_idents.clear();
-	while (!_ioModule->IsEnd() && ident->GetName() != "var" && ident->GetName() != "begin") {
-		token = _lexer->GetNextToken();
-		while (!_ioModule->IsEnd() && token->GetType() != TokenType::IDENTIFICATOR) {
-			token = _lexer->GetNextToken();
+int Syntax::StrVecChecker(vector<string> strs, string str) {
+	int i = 0;
+	for (auto tmpStr : strs) {
+		if (tmpStr == str) {
+			return i;
 		}
-		if (token->GetType() == TokenType::IDENTIFICATOR) {
-			identToken = (IdentificatorToken*)token;
-			ident = identToken->GetValue();
-		}
+		i++;
 	}
+	return -1;
 }
 
-void Syntax::SkipVariants(Token* token, IdentificatorToken* identToken, Identificator* ident) {
-	while (!_ioModule->IsEnd() && ident->GetName() != "begin") {
-		token = _lexer->GetNextToken();
-		while (!_ioModule->IsEnd() && token->GetType() != TokenType::IDENTIFICATOR) {
-			token = _lexer->GetNextToken();
+bool Syntax::CheckLexem(string lex) {
+	if (_curToken->GetType() != TokenType::OPERATOR || ((OperatorToken*)_curToken)->GetValue()->GetSymb() != lex) {
+		if (lex == "program") {
+			RaiseError(0, 0, "Не найдено определение программы", 10);
 		}
-		if (token->GetType() == TokenType::IDENTIFICATOR) {
-			identToken = (IdentificatorToken*)token;
-			ident = identToken->GetValue();
+		if (lex == ")") {
+			
 		}
+		if (lex == ":") {
+		
+		}
+		if (lex == "of") {
+		
+		}
+		if (lex == "(") {
+		
+		}
+		if (lex == "[") {
+		
+		}
+		if (lex == "]") {
+		
+		}
+		if (lex == "end") {
+		
+		}
+		if (lex == ";") {
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Нет ';'", 11);
+		}
+		if (lex == "=") {
+
+		}
+		if (lex == "begin") {
+		
+		}
+		if (lex == ",") {
+
+		}
+		if (lex == ":=") {
+
+		}
+		if (lex == "then") {
+
+		}
+		if (lex == "until") {
+
+		}
+		if (lex == "do") {
+
+		}
+		if (lex == "to" || lex == "downto") {
+
+		}
+		if (lex == "if") {
+
+		}
+		if (lex == ".") {
+
+		}
+		if (lex == "..") {
+
+		}
+		return false;
 	}
+	NextToken();
+	return true;
 }
 
-void Syntax::CheckEndVariants(vector<IdentificatorToken*> _addedIdents) {
-	auto tToken = _lexer->GetNextToken();
-	if (tToken->GetType() == TokenType::IDENTIFICATOR) {
-		auto tIdentToken = (IdentificatorToken*)tToken;
-		auto tIdent = tIdentToken->GetValue();
-		if (tIdent->GetName() == "integer" || tIdent->GetName() == "real" || tIdent->GetName() == "string" || tIdent->GetName() == "char") {
-			auto endToken = _lexer->GetNextToken();
-			if (endToken->GetType() == TokenType::OPERATOR) {
-				auto endOperIdentToken = (OperatorToken*)endToken;
-				auto endOperIdent = endOperIdentToken->GetValue();
-				if (endOperIdent->GetSymb() == ";") {
-					auto toBegin = _lexer->GetNextToken();
-					if (toBegin->GetType() == TokenType::IDENTIFICATOR) {
-						auto toBeginIdentToken = (IdentificatorToken*)toBegin;
-						auto toBeginIdent = toBeginIdentToken->GetValue();
-						if (toBeginIdent->GetName() != "begin") {
-							RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
-							_addedIdents.clear();
-						}
-					}
-				} else {
-					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не закончен блок объявления переменных", 113);
-					_addedIdents.clear();
-				}
-			} else {
-				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не закончен блок объявления переменных", 113);
-				_addedIdents.clear();
-			}
-		} else {
-			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не верный идентификатор типа", 112);
-			_addedIdents.clear();
-		}
-	} else {
-		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не верный идентификатор типа", 112);
-		_addedIdents.clear();
+bool Syntax::EmptyToken() {
+	return _curToken == NULL;
+}
+
+bool Syntax::GetProgName() {
+	if (_curToken->GetType() != TokenType::IDENTIFICATOR) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не задано имя программы", 12);
+		return false;
 	}
+	_progName = ((IdentificatorToken*)_curToken)->GetValue()->GetName();
+	NextToken();
+	return true;
+}
+
+bool Syntax::SkipToOper(string oper) {
+	while (!EmptyToken() && _curToken->GetType() != TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() != oper) {
+		NextToken();
+	}
+	if (EmptyToken()) {
+		return false;
+	}
+	return true;
+}
+
+bool Syntax::SkipToIdent(string ident) {
+	while (!EmptyToken() && _curToken->GetType() != TokenType::IDENTIFICATOR && ((IdentificatorToken*)_curToken)->GetValue()->GetName() != ident) {
+		NextToken();
+	}
+	if (EmptyToken()) {
+		return false;
+	}
+	return true;
+}
+
+bool Syntax::SkipToOneOfOpers(vector<string> opers) {
+	while (!EmptyToken() && _curToken->GetType() != TokenType::OPERATOR && StrVecChecker(opers, ((OperatorToken*)_curToken)->GetValue()->GetSymb()) == -1) {
+		NextToken();
+	}
+	if (EmptyToken()) {
+		return false;
+	}
+	return true;
+}
+
+bool Syntax::SkipToOneOfIdents(vector<string> idents) {
+	while (!EmptyToken() && _curToken->GetType() != TokenType::IDENTIFICATOR && StrVecChecker(idents, ((IdentificatorToken*)_curToken)->GetValue()->GetName()) == -1) {
+		NextToken();
+	}
+	if (EmptyToken()) {
+		return false;
+	}
+	return true;
 }
 
 // <программа>::=program <имя>; <блок>.
 void Syntax::BNFProg() {
-	IdentificatorToken* identToken;
-	OperatorToken* operToken;
-
-	Identificator* ident;
-	Operator* oper;
-
-	auto token = _lexer->GetNextToken();
-	if (token->GetType() == TokenType::IDENTIFICATOR) {
-		identToken = (IdentificatorToken*)token;
-		ident = identToken->GetValue();
-		if (ident->GetName() == "program") {
-			token = _lexer->GetNextToken();
-			if (token->GetType() == TokenType::IDENTIFICATOR) {
-				identToken = (IdentificatorToken*)token;
-				ident = identToken->GetValue();
-				token = _lexer->GetNextToken();
-				if (token->GetType() == TokenType::OPERATOR) {
-					operToken = (OperatorToken*)token;
-					oper = operToken->GetValue();
-					if (oper->GetSymb() != ";") {
-						RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закончено определение программы", 13);
-					}
-				} else {
-					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закончено определение программы", 13);
-				}
-			} else {
-				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не задано имя программы", 12);
-			}
-		} else {
-			RaiseError(0, 0, "Не найдено определение программы", 11);
-		}
-	} else {
-		RaiseError(0, 0, "Не найдено определение программы", 11);
+	NextToken();
+	
+	if (!CheckLexem("program") || EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не задано имя программы", 12);
+		return;
 	}
+
+	if (!GetProgName() || EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Нет ';'", 11);
+		return;
+	}
+
+	if (!CheckLexem(";") || EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
+	}
+
 	BNFBlock();
+
+	CheckLexem(".");
+	if (!EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Текст после окончания программы", 30);
+	}
 }
 
 // <блок>::=<раздел констант><раздел переменных><раздел операторов>
@@ -142,97 +195,106 @@ void Syntax::BNFBlock() {
 	IdentificatorToken* identToken;
 	Identificator* ident;
 
-	auto token = _lexer->GetNextToken();
-	if (token->GetType() == TokenType::IDENTIFICATOR) {
-		identToken = (IdentificatorToken*)token;
-		ident = identToken->GetValue();
-		if (ident->GetName() == "const") {
-			BNFConsts();
-			token = _lexer->GetCurToken();
-		}
-		if (token->GetType() == TokenType::IDENTIFICATOR) {
-			identToken = (IdentificatorToken*)token;
-			ident = identToken->GetValue();
-			if (ident->GetName() == "var") {
-				BNFVariants();
-				token = _lexer->GetCurToken();
-			}
-			if (token->GetType() == TokenType::IDENTIFICATOR) {
-				identToken = (IdentificatorToken*)token;
-				ident = identToken->GetValue();
-				if (ident->GetName() != "begin") {
-					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
-				}
-			} else {
-				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
-			}
-		} else {
-			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
-		}
-	} else {
-		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определены блоки", 14);
+	vector<string> constsBlock = { "const", "var", "begin" };
+	vector<string> variantsBlock = { "var", "begin" };
+	vector<string> opersBlock = { "begin" };
+
+	if (!SkipToOneOfIdents(constsBlock)) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
 	}
+	identToken = (IdentificatorToken*)_curToken;
+	ident = identToken->GetValue();
+
+	if (ident->GetName() == "const") {
+		NextToken();
+		BNFConsts();
+	}
+
+	if(!SkipToOneOfIdents(variantsBlock)) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
+	}
+	identToken = (IdentificatorToken*)_curToken;
+	ident = identToken->GetValue();
+
+	if (ident->GetName() == "var") {
+		NextToken();
+		BNFVariants();
+	}
+
+	if (!SkipToIdent("begin")) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
+	}
+
+	identToken = (IdentificatorToken*)_curToken;
+	ident = identToken->GetValue();
+
+	NextToken();
 	BNFOpers();
 }
 
 // <раздел констант>::=<пусто>|const <определение константы>; {<определение константы>;}
 void Syntax::BNFConsts() {
-	// если не было const, не попадем
-	IdentificatorToken* identToken;
-	OperatorToken* operToken;
-
-	Identificator* ident;
-	Operator* oper;
-
-	auto token = _lexer->GetNextToken();
-	if (token->GetType() == TokenType::IDENTIFICATOR) {
-		identToken = (IdentificatorToken*)token;
-		ident = identToken->GetValue();
-		while (!_ioModule->IsEnd() && ident->GetName() != "var" && ident->GetName() != "begin") {
-			BNFConstDif();
-			token = _lexer->GetNextToken();
-			if (token->GetType() == TokenType::OPERATOR) {
-				operToken = (OperatorToken*)token;
-				oper = operToken->GetValue();
-				if (oper->GetSymb() != ";") {
-					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закончено объявление константы", 18);
-					SkipConsts(token, identToken, ident);
-				} else {
-					token = _lexer->GetNextToken();
-					if (token->GetType() == TokenType::IDENTIFICATOR) {
-						identToken = (IdentificatorToken*)token;
-						ident = identToken->GetValue();
-					} else {
-						RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "В программе не определен основной блок", 15);
-						SkipConsts(token, identToken, ident);
-					}
-				}
-			} else {
-				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закончено объявление константы", 18);
-				SkipConsts(token, identToken, ident);
-			}
-		}
-	} else {
-		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указано имя константы", 19);
+	vector<string> constsBlock = { "const", "var", "begin" };
+	if (EmptyToken() || _curToken->GetType() != TokenType::IDENTIFICATOR) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указаны имена констант", 50);
+		SkipToOper(";");
+		SkipToOneOfIdents(constsBlock);
+	}
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
+	}
+	auto identStr = ((IdentificatorToken*)_curToken)->GetValue()->ToString();
+	if (identStr == "const") {
+		NextToken();
+		BNFConsts();
+		return;
+	}
+	if (identStr == "var" || identStr == "begin") {
+		return;
+	}
+	BNFConstDif();
+	while (!EmptyToken() && _curToken->GetType() == TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() == ";") {
+		NextToken();
+		BNFConstDif();
+	}
+	if (_curToken->GetType() == TokenType::IDENTIFICATOR && ((IdentificatorToken*)_curToken)->GetValue()->ToString() == "const") {
+		NextToken();
+		BNFConsts();
 	}
 }
 
 // <раздел переменных>::=var <описание однотипных переменных>;{<описание однотипных переменных>;} | <пусто>
 void Syntax::BNFVariants() {
-	// если не было var, не попадем
-	IdentificatorToken* identToken;
-	OperatorToken* operToken;
-
-	Identificator* ident;
-	Operator* oper;
-
-	auto token = _lexer->GetNextToken();
-	if (token->GetType() == TokenType::IDENTIFICATOR) {
-		identToken = (IdentificatorToken*)token;
-		ident = identToken->GetValue();
+	vector<string> variantsBlock = { "var", "begin" };
+	if (EmptyToken() || _curToken->GetType() != TokenType::IDENTIFICATOR) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указаны имена переменных", 60);
+		SkipToOper(";");
+		SkipToOneOfIdents(variantsBlock);
+	}
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
+	}
+	auto identStr = ((IdentificatorToken*)_curToken)->GetValue()->ToString();
+	if (identStr == "var") {
+		BNFConsts();
+		return;
+	}
+	if (identStr == "begin") {
+		return;
+	}
+	BNFSingleTypeVariants();
+	while (!EmptyToken() && _curToken->GetType() == TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() == ";") {
+		NextToken();
 		BNFSingleTypeVariants();
-	} else {
-		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указано имя переменной", 110);
+	}
+	if (_curToken->GetType() == TokenType::IDENTIFICATOR && ((IdentificatorToken*)_curToken)->GetValue()->ToString() == "var") {
+		NextToken();
+		BNFVariants();
 	}
 }
 
@@ -243,97 +305,85 @@ void Syntax::BNFOpers() {
 
 // <определение константы>::=<имя>=<константа>
 void Syntax::BNFConstDif() {
-	IdentificatorToken* identToken;
-	OperatorToken* operToken;
-	ValueToken* valToken;
-
-	Identificator* ident;
-	Operator* oper;
-	Value* val;
-
-	auto token = _lexer->GetCurToken();
-	identToken = (IdentificatorToken*)token;
-	ident = identToken->GetValue();
-
-	auto eqToken = _lexer->GetNextToken();
-	if (eqToken->GetType() == TokenType::OPERATOR) {
-		operToken = (OperatorToken*)eqToken;
-		oper = operToken->GetValue();
-		if (oper->GetSymb() == "=") {
-			auto conToken = _lexer->GetNextToken();
-			if (conToken->GetType() == TokenType::VALUE) {
-				valToken = (ValueToken*)conToken;
-				_idents.push_back(identToken);
-			} else if (conToken->GetType() == TokenType::IDENTIFICATOR) {
-				auto testIdentToken = (IdentificatorToken*)conToken;
-				if (CheckIdents(testIdentToken)) {
-					_idents.push_back(identToken);
-				} else {
-					RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Объявление константы не заданным идетификатором", 16);
-				}
-			} else {
-				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление константы", 17);
-			}
-		} else {
-			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление константы", 17);
-		}
-	} else {
-		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление константы", 17);
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
 	}
+
+	if (_curToken->GetType() != TokenType::IDENTIFICATOR) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неправильно указаны имена констант", 51);
+		return;
+	}
+
+	NextToken();
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
+	}
+
+	if (_curToken->GetType() == TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() != "=") {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указано значение константы", 52);
+		return;
+	}
+
+	NextToken();
+
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указано значение константы", 52);
+		return;
+	}
+
+	if (_curToken->GetType() != TokenType::VALUE) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указано значение константы", 52);
+		return;
+	}
+	NextToken();
 }
 
 // <описание однотипных переменных>::=<имя>{,<имя>}:<тип>
 void Syntax::BNFSingleTypeVariants() {
-	IdentificatorToken* identToken;
-	OperatorToken* operToken;
-	ValueToken* valToken;
-
-	Identificator* ident;
-	Operator* oper;
-	Value* val;
-
-	auto token = _lexer->GetCurToken();
-	identToken = (IdentificatorToken*)token;
-	ident = identToken->GetValue();
-
-	vector<IdentificatorToken*> addedIdents;
-
-	auto dToken = _lexer->GetNextToken();
-	if (dToken->GetType() == TokenType::OPERATOR) {
-		operToken = (OperatorToken*)dToken;
-		oper = operToken->GetValue();
-		while (!_ioModule->IsEnd() && oper->GetSymb() != ":") {
-			token = _lexer->GetNextToken();
-			if (token->GetType() == TokenType::IDENTIFICATOR) {
-				identToken = (IdentificatorToken*)token;
-				ident = identToken->GetValue();
-				addedIdents.push_back(identToken);
-				dToken = _lexer->GetNextToken();
-				if (dToken->GetType() == TokenType::OPERATOR) {
-					operToken = (OperatorToken*)dToken;
-					oper = operToken->GetValue();
-					if (oper->GetSymb() != ":" || oper->GetSymb() != ",") {
-						SkipVariants(token, identToken, ident);
-						RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление переменной", 111);
-						addedIdents.clear();
-					}
-				}
-			} else {
-				SkipVariants(token, identToken, ident);
-				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление переменной", 111);
-				addedIdents.clear();
-			}
-		}
-		if (oper->GetSymb() != ":") {
-			CheckEndVariants(addedIdents);
-		}
-	} else {
-		SkipVariants(token, identToken, ident);
-		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неверное объявление переменной", 111);
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
 	}
-	for (auto id : addedIdents) {
-		_idents.push_back(id);
+
+	if (_curToken->GetType() != TokenType::IDENTIFICATOR) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неправильно указаны имена переменных", 61);
+		return;
 	}
+	while (!EmptyToken() && _curToken->GetType() == TokenType::IDENTIFICATOR) {
+		NextToken();
+		if (EmptyToken()) {
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+			return;
+		}
+		if (_curToken->GetType() != TokenType::OPERATOR) {
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неправильно указаны имена переменных", 61);
+			return;
+		}
+		if (((OperatorToken*)_curToken)->GetValue()->GetSymb() == ",") {
+			NextToken();
+		}
+	}
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указан тип переменных", 62);
+		return;
+	}
+	if (_curToken->GetType() != TokenType::OPERATOR || (_curToken->GetType() == TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() != ":")) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указан тип переменных", 62);
+		return;
+	}
+	NextToken();
+	if (_curToken->GetType() != TokenType::IDENTIFICATOR) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указан тип переменных", 62);
+		return;
+	}
+	auto iTokenVal = ((IdentificatorToken*)_curToken)->GetValue()->GetName();
+	if (iTokenVal != "integer" && iTokenVal != "double" && iTokenVal != "char" && iTokenVal != "string") {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неправильно указан тип переменных", 63);
+		return;
+	}
+	NextToken();
 }
 
 // <составной оператор>::= begin <оператор>{;<оператор>} end

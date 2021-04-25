@@ -23,12 +23,19 @@ class Syntax {
 private:
 	Lexer* _lexer;
 	IOModule* _ioModule;
+	Token* _curToken;
 	vector<IdentificatorToken*> _idents;
 	vector<Error> _errors;
-	bool CheckIdents(IdentificatorToken*);
-	void SkipConsts(Token*, IdentificatorToken*, Identificator*);
-	void CheckEndVariants(vector<IdentificatorToken*>);
-	void SkipVariants(Token*, IdentificatorToken*, Identificator*);
+	string _progName;
+	bool CheckLexem(string);
+	void NextToken();
+	int StrVecChecker(vector<string>, string);
+	bool GetProgName();
+	bool EmptyToken();
+	bool SkipToOper(string);
+	bool SkipToIdent(string);
+	bool SkipToOneOfOpers(vector<string>);
+	bool SkipToOneOfIdents(vector<string>);
 public:
 	Syntax(string, string);
 	~Syntax();
