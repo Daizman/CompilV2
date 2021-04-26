@@ -59,32 +59,10 @@ bool Syntax::CheckLexem(string lex) {
 			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не найдено определение программы", 10);
 		}
 		if (lex == ")") {
-			
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закрыто выражение", 17);
 		}
-		if (lex == ":") {
-		
-		}
-		if (lex == "of") {
-		
-		}
-		if (lex == "(") {
-		
-		}
-		if (lex == "[") {
-		
-		}
-		if (lex == "]") {
-		
-		}
-		
 		if (lex == ";") {
 			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Нет ';'", 11);
-		}
-		if (lex == "=") {
-
-		}
-		if (lex == ",") {
-
 		}
 		if (lex == ":=") {
 			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ошибка при присваивании значения переменной", 64);
@@ -100,32 +78,10 @@ bool Syntax::CheckLexem(string lex) {
 				RaiseError(0, 0, "Не найдено определение программы", 10);
 			}
 			if (lex == ")") {
-
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закрыто выражение", 17);
 			}
-			if (lex == ":") {
-
-			}
-			if (lex == "of") {
-
-			}
-			if (lex == "(") {
-
-			}
-			if (lex == "[") {
-
-			}
-			if (lex == "]") {
-
-			}
-
 			if (lex == ";") {
 				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Нет ';'", 11);
-			}
-			if (lex == "=") {
-
-			}
-			if (lex == ",") {
-
 			}
 			if (lex == ":=") {
 				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ошибка при присваивании значения переменной", 64);

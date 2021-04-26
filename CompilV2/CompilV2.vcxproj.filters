@@ -57,6 +57,15 @@
     <ClCompile Include="Syntax.cpp">
       <Filter>Исходные файлы\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="SemIdentificator.cpp">
+      <Filter>Исходные файлы\Structs</Filter>
+    </ClCompile>
+    <ClCompile Include="Semantic.cpp">
+      <Filter>Исходные файлы\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Scope.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="testInput1.txt">
@@ -96,6 +105,18 @@
     </ClInclude>
     <ClInclude Include="Syntax.hpp">
       <Filter>Файлы заголовков\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Semantic.h">
+      <Filter>Файлы заголовков\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="SemIdentificator.h">
+      <Filter>Файлы заголовков\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="ScopeType.hpp">
+      <Filter>Файлы заголовков\Structs\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="Scope.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

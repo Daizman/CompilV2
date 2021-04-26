@@ -144,6 +144,9 @@
     <ClCompile Include="IOModule.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="Operator.cpp" />
+    <ClCompile Include="Scope.cpp" />
+    <ClCompile Include="Semantic.cpp" />
+    <ClCompile Include="SemIdentificator.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Syntax.cpp" />
     <ClCompile Include="Token.cpp" />
@@ -158,6 +161,10 @@
     <ClInclude Include="IOModule.hpp" />
     <ClInclude Include="Lexer.hpp" />
     <ClInclude Include="Operator.hpp" />
+    <ClInclude Include="Scope.h" />
+    <ClInclude Include="ScopeType.hpp" />
+    <ClInclude Include="Semantic.h" />
+    <ClInclude Include="SemIdentificator.h" />
     <ClInclude Include="Syntax.hpp" />
     <ClInclude Include="Token.hpp" />
     <ClInclude Include="Value.hpp" />

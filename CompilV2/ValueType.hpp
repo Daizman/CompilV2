@@ -5,5 +5,6 @@ enum class ValueType {
 	INTEGER,
 	FLOAT,
 	CHARACTER,
-	STRING
+	STRING,
+	NONE
 };
