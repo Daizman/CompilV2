@@ -19,7 +19,7 @@ Lexer* Syntax::GetLexer() {
 	return _lexer;
 }
 
-void Syntax::RaiseError(int pos, int strNum, string reason, int code) {
+void Syntax::RaiseError(int strNum, int pos, string reason, int code) {
 	auto error = Error(strNum + 1, pos + 1, reason, code);
 	_errors.push_back(error);
 }
@@ -282,8 +282,9 @@ void Syntax::BNFProg() {
 
 	cout << "OPER DIFF END" << endl;
 	PrintErrors();
+	_semant->GetLastScope()->ClearScopeIfErrors();
 	cout << "------------------" << endl;
-
+	_semant->GetLastScope()->PrintErrors();
 	CheckLexem(".");
 	if (!EmptyToken()) {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "“екст после окончани€ программы", 30);
@@ -313,13 +314,13 @@ void Syntax::BNFBlock() {
 
 	cout << "CONST DIFF END" << endl;
 	PrintErrors();
+	_semant->GetLastScope()->ClearScopeIfErrors();
 	cout << "------------------" << endl;
 
 	if(!SkipToOneOfIdents(variantsBlock)) {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе определен следующий об€зательный блок", 40);
 		return;
 	}
-	_semant->GetLastScope()->ClearScopeIfErrors();
 	identToken = (IdentificatorToken*)_curToken;
 	ident = identToken->GetValue();
 
@@ -330,13 +331,13 @@ void Syntax::BNFBlock() {
 
 	cout << "VAR DIFF END" << endl;
 	PrintErrors();
+	_semant->GetLastScope()->ClearScopeIfErrors();
 	cout << "------------------" << endl;
 
 	if (!SkipToIdent("begin")) {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе определен следующий об€зательный блок", 40);
 		return;
 	}
-	_semant->GetLastScope()->ClearScopeIfErrors();
 
 	BNFOpers();
 }
@@ -547,8 +548,9 @@ void Syntax::BNFConcOper() {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "ќдиночное значение", 42);
 		return;
 	}
+	_semant->CreateScope();
+	_semant->GetLastScope()->SetScopeType(ScopeType::BLOCK);
 	while (!EmptyToken() 
-		// && _curToken->GetType() != TokenType::OPERATOR 
 		&& _curToken->GetType() != TokenType::VALUE
 		&& !CheckIdentWS("end")) {
 		BNFOper();
@@ -601,7 +603,12 @@ void Syntax::BNFDiffExpr() {
 
 // <оператор присваивани€>::=<переменна€>:=<выражение>
 void Syntax::BNFOperAssigm() {
-	BNFVar();
+	if (_curToken->GetType() != TokenType::IDENTIFICATOR) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе задано им€ переменной", 63);
+	} else {
+		_semant->GetLastScope()->CheckIdentScope(((IdentificatorToken*)_curToken)->GetValue()->GetName());
+		NextToken();
+	}
 	CheckLexem(":=");
 	BNFExpres();
 }
@@ -639,11 +646,6 @@ void Syntax::BNFSimpleExpr() {
 	}
 }
 
-// <аддитивна€ операци€>::=+|-
-void Syntax::BNFAdditOper() {
-
-}
-
 // <слагаемое>::=<множитель>{<мультипликативна€ операци€><множитель>}
 void Syntax::BNFSlag() {
 	BNFMultiplier();
@@ -651,11 +653,6 @@ void Syntax::BNFSlag() {
 		NextToken();
 		BNFMultiplier();
 	}
-}
-
-// <мультипликативна€ операци€>::=*|/
-void Syntax::BNFMultOper() {
-
 }
 
 // <множитель>::=<переменна€>|<константа без знака>|(<выражение>)
@@ -666,6 +663,7 @@ void Syntax::BNFMultiplier() {
 	}
 
 	if (_curToken->GetType() == TokenType::VALUE) {
+		_semant->GetLastScope()->CheckInitVarTypeError(((ValueToken*)_curToken)->GetValue()->GetType());
 		NextToken();
 		return;
 	}

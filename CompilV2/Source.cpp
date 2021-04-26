@@ -11,8 +11,8 @@ int main() {
 	setlocale(LC_ALL, "Russian");
 	//iTest();
 	//lexerTest();
-	syntTest();
-	//semTest();
+	//syntTest();
+	semTest();
 	return 0;
 }
 
@@ -50,5 +50,11 @@ void syntTest() {
 }
 
 void semTest() {
-	
+	//auto syntax = new Syntax("synt_test0.pas", "output");
+	//auto syntax = new Syntax("synt_test1.pas", "output");
+	//auto syntax = new Syntax("constTest.pas", "output");
+	//auto syntax = new Syntax("varsTest.pas", "output");
+	auto syntax = new Syntax("sem_test0.pas", "output");
+	//auto syntax = new Syntax("sem_test1.pas", "output");
+	syntax->BNFProg();
 }

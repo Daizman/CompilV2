@@ -8,6 +8,7 @@ private:
 	vector<string> _names;
 	ScopeType _type;
 	Scope* _parScope;
+	string _activeVarName = "";
 	vector<Error> _errors;
 	map<string, SemIdentificator*> _idMap; //рх
 	IOModule* _ioModule;
@@ -15,6 +16,7 @@ private:
 	SemIdentificator* CheckTypeByName(string, vector<ScopeType>);
 	SemIdentificator* CheckName(string);
 	string StrType(ValueType);
+	int StrVecChecker(vector<string>, string);
 public:
 	Scope(Scope*, IOModule*, ScopeType);
 	Scope();
@@ -28,6 +30,8 @@ public:
 	void AddType(string);
 	void AddName(string);
 	void AddConst(string, Value*);
+	void CheckInitVarTypeError(ValueType);
+	void CheckIdentScope(string);
 	void AddVars();
 	void AddNone();
 	void SetPar(Scope*);

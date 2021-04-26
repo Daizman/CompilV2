@@ -252,10 +252,6 @@ Token* Lexer::GetNextToken() {
         symb = _ioModule->GetNextSymb();
     }
 
-    /*if (_curToken != NULL) {
-        delete _curToken;
-    }*/
-
 	if (IsCharacter(symb)) {
         CharacterTokenHandler(symb);
         _ioModule->GetNextSymb();

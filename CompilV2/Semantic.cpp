@@ -16,9 +16,10 @@ void Semantic::CreateMainScope() {
 }
 
 void Semantic::CreateScope() {
-	auto sc = new Scope();
 	auto parSc = _scopes.back();
+	auto sc = new Scope(parSc, _ioMod, ScopeType::CONSTS);
 	sc->SetPar(parSc);
+	_scopes.push_back(sc);
 }
 
 Scope* Semantic::GetLastScope() {

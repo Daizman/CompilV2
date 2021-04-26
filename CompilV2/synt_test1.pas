@@ -2,7 +2,7 @@
 const a=1; b=2;
 const c=3;
 var f, d, g:integer;
-var kk: double;
+var kk: real;
 begin
   f := a;
   begin

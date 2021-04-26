@@ -141,5 +141,11 @@
     <None Include="synt_test1.pas">
       <Filter>Файлы ресурсов</Filter>
     </None>
+    <None Include="sem_test0.pas">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+    <None Include="sem_test1.pas">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
   </ItemGroup>
 </Project>

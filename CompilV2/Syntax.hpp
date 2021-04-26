@@ -51,9 +51,7 @@ public:
 	void BNFExpres();
 	void BNFSimpleExpr();
 	void BNFDiffExpr();
-	void BNFAdditOper();
 	void BNFSlag();
-	void BNFMultOper();
 	void BNFMultiplier();
 };
 

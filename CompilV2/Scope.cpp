@@ -13,26 +13,26 @@ int Scope::CheckScopeTypeVec(vector<ScopeType> scope, ScopeType st) {
 
 SemIdentificator* Scope::CheckTypeByName(string name, vector<ScopeType> ficScope) {
 	if (_idMap.find(name) == _idMap.end()) {
+		if (_parScope != NULL) {
+			return _parScope->CheckTypeByName(name, ficScope);
+		}
 		return NULL;
 	}
 	if (CheckScopeTypeVec(ficScope, _idMap[name]->GetScope()) != -1) {
 		return _idMap[name];
-	}
-	if (_parScope != NULL) {
-		return _parScope->CheckTypeByName(name, ficScope);
 	}
 	return NULL;
 }
 
 SemIdentificator* Scope::CheckName(string name) {
 	if (_idMap.find(name) == _idMap.end()) {
+		if (_parScope != NULL) {
+			return _parScope->CheckName(name);
+		}
 		return NULL;
 	}
 	if (_idMap[name]->GetScope() == _type) {
 		return _idMap[name];
-	}
-	if (_parScope != NULL) {
-		return _parScope->CheckName(name);
 	}
 	return NULL;
 }
@@ -128,12 +128,44 @@ void Scope::AddName(string name) {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Добавление существующего имени", 73);
 		return;
 	}
+	if (StrVecChecker(_names, name) != -1) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Добавление существующего имени", 73);
+		return;
+	}
 	_names.push_back(name);
 }
 
 void Scope::AddConst(string name, Value* val) {
 	_types.push_back(val->GetType());
 	_idMap.insert({ name, new SemIdentificator(StrType(val->GetType()), ScopeType::CONSTS, val->GetType()) });
+}
+
+void Scope::CheckInitVarTypeError(ValueType vt) {
+	if (_activeVarName == "") {
+		return;
+	}
+	auto t = CheckName(_activeVarName);
+	if (t == NULL) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Попытка означить не существющую переменную", 74);
+		return;
+	}
+	if (t->GetType() != vt) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ошибка типов", 75);
+		return;
+	}
+}
+
+void Scope::CheckIdentScope(string identName) {
+	auto t = CheckTypeByName(identName, { ScopeType::CONSTS , ScopeType::VARS });
+	if (t == NULL) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Попытка означить не существющую переменную", 74);
+		return;
+	}
+	if (t->GetScope() == ScopeType::CONSTS && _type != ScopeType::CONSTS) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Попытка изменить константу", 75);
+		return;
+	}
+	_activeVarName = identName;
 }
 
 void Scope::AddVars() {
@@ -168,4 +200,15 @@ void Scope::SetScopeType(ScopeType st) {
 
 ScopeType Scope::GetScopeType() {
 	return _type;
+}
+
+int Scope::StrVecChecker(vector<string> strs, string str) {
+	int i = 0;
+	for (auto tmpStr : strs) {
+		if (tmpStr == str) {
+			return i;
+		}
+		i++;
+	}
+	return -1;
 }
