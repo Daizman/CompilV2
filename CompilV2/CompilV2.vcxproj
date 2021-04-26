@@ -153,6 +153,7 @@
     <ClCompile Include="Value.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="synt_errors.txt" />
     <Text Include="testInput1.txt" />
   </ItemGroup>
   <ItemGroup>

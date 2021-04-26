@@ -675,5 +675,10 @@ void Syntax::BNFMultiplier() {
 		return;
 	}
 
+	if (_curToken->GetType() == TokenType::OPERATOR) {
+		RaiseError(_ioModule->GetCurStringNum()-1, _ioModule->GetCurSymbNum(), "Не верное выражение", 58);
+		return;
+	}
+
 	BNFVar();
 }

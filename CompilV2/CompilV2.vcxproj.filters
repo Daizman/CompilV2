@@ -71,6 +71,9 @@
     <Text Include="testInput1.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
+    <Text Include="synt_errors.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TokenType.hpp">

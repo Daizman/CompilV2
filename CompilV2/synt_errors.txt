@@ -1,0 +1,5 @@
+program prog1;
+var a, b, c: integer;
+begin
+c := a +;
+end.
