@@ -37,7 +37,10 @@ void lexerTest() {
 }
 
 void syntTest() {
-	auto syntax = new Syntax("constTest.pas", "output");
+	//auto syntax = new Syntax("synt_test0.pas", "output");
+	auto syntax = new Syntax("synt_test1.pas", "output");
+	//auto syntax = new Syntax("constTest.pas", "output");
+	//auto syntax = new Syntax("constTest.pas", "output");
 	//auto syntax = new Syntax("varsTest.pas", "output");
 	//auto syntax = new Syntax("constAndVars.pas", "output");
 	syntax->BNFProg();

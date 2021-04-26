@@ -114,5 +114,11 @@
     <None Include="varsTest.pas">
       <Filter>Файлы ресурсов</Filter>
     </None>
+    <None Include="synt_test0.pas">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
+    <None Include="synt_test1.pas">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
   </ItemGroup>
 </Project>

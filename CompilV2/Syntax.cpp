@@ -41,10 +41,22 @@ int Syntax::StrVecChecker(vector<string> strs, string str) {
 	return -1;
 }
 
+bool Syntax::IsAdditive() {
+	return CheckLexemWS("+") || CheckLexem("-");
+}
+
+bool Syntax::IsMultipl() {
+	return CheckLexemWS("*") || CheckLexem("/");
+}
+
 bool Syntax::CheckLexem(string lex) {
-	if (_curToken->GetType() != TokenType::OPERATOR || ((OperatorToken*)_curToken)->GetValue()->GetSymb() != lex) {
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ошибка", 17);
+		return false;
+	}
+	if (_curToken->GetType() != TokenType::OPERATOR) {
 		if (lex == "program") {
-			RaiseError(0, 0, "Не найдено определение программы", 10);
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не найдено определение программы", 10);
 		}
 		if (lex == ")") {
 			
@@ -64,49 +76,125 @@ bool Syntax::CheckLexem(string lex) {
 		if (lex == "]") {
 		
 		}
-		if (lex == "end") {
 		
-		}
 		if (lex == ";") {
 			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Нет ';'", 11);
 		}
 		if (lex == "=") {
 
 		}
-		if (lex == "begin") {
-		
-		}
 		if (lex == ",") {
 
 		}
 		if (lex == ":=") {
-
-		}
-		if (lex == "then") {
-
-		}
-		if (lex == "until") {
-
-		}
-		if (lex == "do") {
-
-		}
-		if (lex == "to" || lex == "downto") {
-
-		}
-		if (lex == "if") {
-
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ошибка при присваивании значения переменной", 64);
 		}
 		if (lex == ".") {
-
-		}
-		if (lex == "..") {
-
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ожидалась . в качестве завершения программы", 15);
 		}
 		return false;
 	}
+	if (_curToken->GetType() == TokenType::OPERATOR) {
+		if (((OperatorToken*)_curToken)->GetValue()->GetSymb() != lex) {
+			if (lex == "program") {
+				RaiseError(0, 0, "Не найдено определение программы", 10);
+			}
+			if (lex == ")") {
+
+			}
+			if (lex == ":") {
+
+			}
+			if (lex == "of") {
+
+			}
+			if (lex == "(") {
+
+			}
+			if (lex == "[") {
+
+			}
+			if (lex == "]") {
+
+			}
+
+			if (lex == ";") {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Нет ';'", 11);
+			}
+			if (lex == "=") {
+
+			}
+			if (lex == ",") {
+
+			}
+			if (lex == ":=") {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ошибка при присваивании значения переменной", 64);
+			}
+			if (lex == ".") {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ожидалась . в качестве завершения программы", 15);
+			}
+			return false;
+		}
+	}
 	NextToken();
 	return true;
+}
+
+bool Syntax::CheckLexemWS(string lex) {
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ошибка", 17);
+		return false;
+	}
+	bool checker = false;
+	if (_curToken->GetType() == TokenType::OPERATOR) {
+		if (((OperatorToken*)_curToken)->GetValue()->GetSymb() != lex) {
+			checker = true;
+		}
+	}
+	return !(_curToken->GetType() != TokenType::OPERATOR || checker);
+}
+
+bool Syntax::CheckIdent(string ident) {
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ошибка", 17);
+		return false;
+	}
+	if (_curToken->GetType() != TokenType::IDENTIFICATOR) {
+		if (ident == "end") {
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закрыт обязательный блок", 41);
+		}
+		if (ident == "begin") {
+			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		}
+		return false;
+	}
+	if (_curToken->GetType() == TokenType::IDENTIFICATOR) {
+		if (((IdentificatorToken*)_curToken)->GetValue()->GetName() != ident) {
+			if (ident == "end") {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закрыт обязательный блок", 41);
+			}
+			if (ident == "begin") {
+				RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+			}
+			return false;
+		}
+	}
+	NextToken();
+	return true;
+}
+
+bool Syntax::CheckIdentWS(string ident) {
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ошибка", 17);
+		return false;
+	}
+	bool checker = false;
+	if (_curToken->GetType() == TokenType::IDENTIFICATOR) {
+		if (((IdentificatorToken*)_curToken)->GetValue()->GetName() != ident) {
+			checker = true;
+		}
+	}
+	return !(_curToken->GetType() != TokenType::IDENTIFICATOR || checker);
 }
 
 bool Syntax::EmptyToken() {
@@ -124,7 +212,14 @@ bool Syntax::GetProgName() {
 }
 
 bool Syntax::SkipToOper(string oper) {
-	while (!EmptyToken() && _curToken->GetType() != TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() != oper) {
+	if (EmptyToken()) {
+		return false;
+	}
+	bool checker = false;
+	if (_curToken->GetType() == TokenType::OPERATOR) {
+		checker = ((OperatorToken*)_curToken)->GetValue()->GetSymb() != oper;
+	}
+	while (!EmptyToken() && (_curToken->GetType() != TokenType::OPERATOR || checker)) {
 		NextToken();
 	}
 	if (EmptyToken()) {
@@ -134,7 +229,14 @@ bool Syntax::SkipToOper(string oper) {
 }
 
 bool Syntax::SkipToIdent(string ident) {
-	while (!EmptyToken() && _curToken->GetType() != TokenType::IDENTIFICATOR && ((IdentificatorToken*)_curToken)->GetValue()->GetName() != ident) {
+	if (EmptyToken()) {
+		return false;
+	}
+	bool checker = false;
+	if (_curToken->GetType() == TokenType::IDENTIFICATOR) {
+		checker = ((IdentificatorToken*)_curToken)->GetValue()->GetName() != ident;
+	}
+	while (!EmptyToken() && (_curToken->GetType() != TokenType::IDENTIFICATOR || checker)) {
 		NextToken();
 	}
 	if (EmptyToken()) {
@@ -144,7 +246,15 @@ bool Syntax::SkipToIdent(string ident) {
 }
 
 bool Syntax::SkipToOneOfOpers(vector<string> opers) {
-	while (!EmptyToken() && _curToken->GetType() != TokenType::OPERATOR && StrVecChecker(opers, ((OperatorToken*)_curToken)->GetValue()->GetSymb()) == -1) {
+	if (EmptyToken()) {
+		return false;
+	}
+	bool checker = false;
+	if (_curToken->GetType() == TokenType::OPERATOR) {
+		checker = StrVecChecker(opers, ((OperatorToken*)_curToken)->GetValue()->GetSymb()) == -1;
+	}
+
+	while (!EmptyToken() && (_curToken->GetType() != TokenType::OPERATOR || checker)) {
 		NextToken();
 	}
 	if (EmptyToken()) {
@@ -154,7 +264,15 @@ bool Syntax::SkipToOneOfOpers(vector<string> opers) {
 }
 
 bool Syntax::SkipToOneOfIdents(vector<string> idents) {
-	while (!EmptyToken() && _curToken->GetType() != TokenType::IDENTIFICATOR && StrVecChecker(idents, ((IdentificatorToken*)_curToken)->GetValue()->GetName()) == -1) {
+	if (EmptyToken()) {
+		return false;
+	}
+	bool checker = false;
+	if (_curToken->GetType() == TokenType::IDENTIFICATOR) {
+		checker = StrVecChecker(idents, ((IdentificatorToken*)_curToken)->GetValue()->GetName()) == -1;
+	}
+	
+	while (!EmptyToken() && (_curToken->GetType() != TokenType::IDENTIFICATOR || checker)) {
 		NextToken();
 	}
 	if (EmptyToken()) {
@@ -182,7 +300,15 @@ void Syntax::BNFProg() {
 		return;
 	}
 
+	cout << "PROGRAM DIFF END" << endl;
+	PrintErrors();
+	cout << "------------------" << endl;
+
 	BNFBlock();
+
+	cout << "OPER DIFF END" << endl;
+	PrintErrors();
+	cout << "------------------" << endl;
 
 	CheckLexem(".");
 	if (!EmptyToken()) {
@@ -211,6 +337,10 @@ void Syntax::BNFBlock() {
 		BNFConsts();
 	}
 
+	cout << "CONST DIFF END" << endl;
+	PrintErrors();
+	cout << "------------------" << endl;
+
 	if(!SkipToOneOfIdents(variantsBlock)) {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
 		return;
@@ -223,13 +353,14 @@ void Syntax::BNFBlock() {
 		BNFVariants();
 	}
 
+	cout << "VAR DIFF END" << endl;
+	PrintErrors();
+	cout << "------------------" << endl;
+
 	if (!SkipToIdent("begin")) {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
 		return;
 	}
-
-	identToken = (IdentificatorToken*)_curToken;
-	ident = identToken->GetValue();
 
 	NextToken();
 	BNFOpers();
@@ -247,7 +378,7 @@ void Syntax::BNFConsts() {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
 		return;
 	}
-	auto identStr = ((IdentificatorToken*)_curToken)->GetValue()->ToString();
+	auto identStr = ((IdentificatorToken*)_curToken)->GetValue()->GetName();
 	if (identStr == "const") {
 		NextToken();
 		BNFConsts();
@@ -261,7 +392,7 @@ void Syntax::BNFConsts() {
 		NextToken();
 		BNFConstDif();
 	}
-	if (_curToken->GetType() == TokenType::IDENTIFICATOR && ((IdentificatorToken*)_curToken)->GetValue()->ToString() == "const") {
+	if (_curToken->GetType() == TokenType::IDENTIFICATOR && ((IdentificatorToken*)_curToken)->GetValue()->GetName() == "const") {
 		NextToken();
 		BNFConsts();
 	}
@@ -279,9 +410,9 @@ void Syntax::BNFVariants() {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
 		return;
 	}
-	auto identStr = ((IdentificatorToken*)_curToken)->GetValue()->ToString();
+	auto identStr = ((IdentificatorToken*)_curToken)->GetValue()->GetName();
 	if (identStr == "var") {
-		BNFConsts();
+		BNFVariants();
 		return;
 	}
 	if (identStr == "begin") {
@@ -292,7 +423,7 @@ void Syntax::BNFVariants() {
 		NextToken();
 		BNFSingleTypeVariants();
 	}
-	if (_curToken->GetType() == TokenType::IDENTIFICATOR && ((IdentificatorToken*)_curToken)->GetValue()->ToString() == "var") {
+	if (_curToken->GetType() == TokenType::IDENTIFICATOR && ((IdentificatorToken*)_curToken)->GetValue()->GetName() == "var") {
 		NextToken();
 		BNFVariants();
 	}
@@ -300,7 +431,7 @@ void Syntax::BNFVariants() {
 
 // <раздел операторов>::=<составной оператор>
 void Syntax::BNFOpers() {
-
+	BNFConcOper();
 }
 
 // <определение константы>::=<имя>=<константа>
@@ -315,9 +446,18 @@ void Syntax::BNFConstDif() {
 		return;
 	}
 
+	if (StrVecChecker({ "const", "var", "begin" }, ((IdentificatorToken*)_curToken)->GetValue()->GetName()) != -1) {
+		return;
+	}
+
 	NextToken();
 	if (EmptyToken()) {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
+	}
+
+	if (_curToken->GetType() != TokenType::OPERATOR) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не указано значение константы", 52);
 		return;
 	}
 
@@ -351,6 +491,11 @@ void Syntax::BNFSingleTypeVariants() {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неправильно указаны имена переменных", 61);
 		return;
 	}
+
+	if (StrVecChecker({ "var", "begin" }, ((IdentificatorToken*)_curToken)->GetValue()->GetName()) != -1) {
+		return;
+	}
+
 	while (!EmptyToken() && _curToken->GetType() == TokenType::IDENTIFICATOR) {
 		NextToken();
 		if (EmptyToken()) {
@@ -388,70 +533,144 @@ void Syntax::BNFSingleTypeVariants() {
 
 // <составной оператор>::= begin <оператор>{;<оператор>} end
 void Syntax::BNFConcOper() {
-	
+	/*if (!CheckIdentWS("begin")) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не определен следующий обязательный блок", 40);
+		return;
+	}*/
+	NextToken();
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закрыт обязательный блок", 41);
+		return;
+	}
+	if (_curToken->GetType() == TokenType::VALUE) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Одиночное значение", 42);
+		return;
+	}
+	BNFOper();
+	while (!EmptyToken() 
+		&& _curToken->GetType() != TokenType::OPERATOR 
+		&& _curToken->GetType() != TokenType::VALUE
+		&& !CheckIdentWS("end")) {
+		BNFOper();
+	}
+
+	CheckIdent("end");
 }
 
 // <оператор>::=<непомеченный оператор>
 void Syntax::BNFOper() {
-
+	BNFNotMarkedOper();
 }
 
-// <непомеченный оператор>::=<простой оператор>
+// <непомеченный оператор>::=<простой оператор>|<сложный оператор>
 void Syntax::BNFNotMarkedOper() {
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закрыт обязательный блок", 41);
+		return;
+	}
 
+	if (_curToken->GetType() == TokenType::VALUE) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Одиночное значение", 42);
+		return;
+	}
+
+	if (CheckIdentWS("begin")) {
+		BNFDiffExpr();
+		return;
+	}
+	BNFSimpleOper();
+	NextToken();
 }
 
-// <простой оператор>::=<оператор присваивания>|<пустой оператор>
+// <простой оператор>::=<оператор присваивания>
 void Syntax::BNFSimpleOper() {
-
+	if (CheckLexemWS(";") || CheckIdentWS("end")) {
+		return;
+	}
+	BNFOperAssigm();
 }
 
-// <оператор присваивания>::=<переменная>:=<выражение>|<имя функции>: = <выражение>
+// <сложный оператор>::=<оператор составной>
+void Syntax::BNFDiffExpr() {
+	BNFConcOper();
+}
+
+// <оператор присваивания>::=<переменная>:=<выражение>
 void Syntax::BNFOperAssigm() {
-
+	CheckLexem(":=");
+	BNFExpres();
 }
 
-// <переменная>::=<полная переменная>|<указанная переменная>
+// <переменная>::=<полная переменная>
 void Syntax::BNFVar() {
-	
+	BNFFullVar();
 }
 
 // <полная переменная>::=<имя переменной>
 void Syntax::BNFFullVar() {
-	
+	if (_curToken->GetType() != TokenType::IDENTIFICATOR) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не задано имя переменной", 63);
+		return;
+	}
+	BNFVarName();
 }
 
 // <имя переменной>::=<имя>
 void Syntax::BNFVarName() {
-
+	NextToken();
 }
 
 // <выражение>::=<простое выражение>
 void Syntax::BNFExpres() {
-	
+	BNFSimpleExpr();
 }
 
 // <простое выражение>::=<знак><слагаемое>{<аддитивная операция><слагаемое>}
 void Syntax::BNFSimpleExpr() {
-
+	BNFSlag();
+	while (!EmptyToken() && IsAdditive()) {
+		NextToken();
+		BNFSlag();
+	}
 }
 
-// <аддитивная операция>::=+|-|or
+// <аддитивная операция>::=+|-
 void Syntax::BNFAdditOper() {
 
 }
 
 // <слагаемое>::=<множитель>{<мультипликативная операция><множитель>}
 void Syntax::BNFSlag() {
-	
+	BNFMultiplier();
+	while (!EmptyToken() && IsMultipl()) {
+		NextToken();
+		BNFMultiplier();
+	}
 }
 
-// <мультипликативная операция>::=*|/|div|mod|and
+// <мультипликативная операция>::=*|/
 void Syntax::BNFMultOper() {
 
 }
 
 // <множитель>::=<переменная>|<константа без знака>|(<выражение>)
 void Syntax::BNFMultiplier() {
+	if (EmptyToken()) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Не закрыт обязательный блок", 41);
+		return;
+	}
 
+	if (_curToken->GetType() == TokenType::VALUE) {
+		NextToken();
+		return;
+	}
+
+	if (CheckLexemWS("(")) {
+		NextToken();
+		BNFExpres();
+		CheckLexem(")");
+		return;
+	}
+
+	BNFVar();
 }

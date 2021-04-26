@@ -169,6 +169,8 @@
     <None Include="constAndVars.pas" />
     <None Include="constTest.pas" />
     <None Include="errors.pas" />
+    <None Include="synt_test0.pas" />
+    <None Include="synt_test1.pas" />
     <None Include="test1.pas" />
     <None Include="varsTest.pas" />
   </ItemGroup>

@@ -28,6 +28,7 @@ private:
 	vector<Error> _errors;
 	string _progName;
 	bool CheckLexem(string);
+	bool CheckLexemWS(string);
 	void NextToken();
 	int StrVecChecker(vector<string>, string);
 	bool GetProgName();
@@ -36,6 +37,10 @@ private:
 	bool SkipToIdent(string);
 	bool SkipToOneOfOpers(vector<string>);
 	bool SkipToOneOfIdents(vector<string>);
+	bool IsAdditive();
+	bool IsMultipl();
+	bool CheckIdentWS(string);
+	bool CheckIdent(string);
 public:
 	Syntax(string, string);
 	~Syntax();
@@ -59,6 +64,7 @@ public:
 	void BNFVarName();
 	void BNFExpres();
 	void BNFSimpleExpr();
+	void BNFDiffExpr();
 	void BNFAdditOper();
 	void BNFSlag();
 	void BNFMultOper();

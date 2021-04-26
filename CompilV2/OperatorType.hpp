@@ -42,7 +42,5 @@ enum class OperatorType {
     UNTILSY,
     DOSY,
     IFSY,
-    BEGIN,
-    END,
     PROGRAM
 };
