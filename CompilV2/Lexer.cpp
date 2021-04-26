@@ -260,7 +260,7 @@ Token* Lexer::GetNextToken() {
         auto _oldTokenStart = _curToken->GetStartPos();
         auto _oldTokenType = _curToken->GetType();
         DigitTokenHandler(symb);
-        if (_oldTokenStart == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
+        if (_oldTokenStr == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
             _curToken = GetNextToken();
         } else {
             _ioModule->GetNextSymb();
@@ -270,7 +270,7 @@ Token* Lexer::GetNextToken() {
         auto _oldTokenStart = _curToken->GetStartPos();
         auto _oldTokenType = _curToken->GetType();
         StringTokenHandler(symb);
-        if (_oldTokenStart == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
+        if (_oldTokenStr == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
             _curToken = GetNextToken();
         } else {
             _ioModule->GetNextSymb();
@@ -297,7 +297,7 @@ Token* Lexer::GetNextToken() {
         auto _oldTokenStart = _curToken->GetStartPos();
         auto _oldTokenType = _curToken->GetType();
         DigitTokenHandler(symb);
-        if (_oldTokenStart == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
+        if (_oldTokenStr == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
             _curToken = GetNextToken();
         }
         _ioModule->GetNextSymb();
@@ -306,7 +306,7 @@ Token* Lexer::GetNextToken() {
         auto _oldTokenStart = _curToken->GetStartPos();
         auto _oldTokenType = _curToken->GetType();
         OtherSymbHandler(symb);
-        if (_oldTokenStart == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
+        if (_oldTokenStr == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
             _ioModule->GetNextSymb();
             _curToken = GetNextToken();
         } else {

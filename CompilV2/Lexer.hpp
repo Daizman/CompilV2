@@ -25,12 +25,12 @@ private:
 	void LowerHandler(char);
 	void LongCommHandler(char);
 	void OtherSymbHandler(char);
+	void RaiseError(int, int, string, int);
 public:
 	Lexer(IOModule*);
 	~Lexer();
 	Token* GetNextToken();
 	Token* GetCurToken();
 	void PrintErrors();
-	void RaiseError(int, int, string, int);
 };
 

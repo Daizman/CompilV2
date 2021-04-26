@@ -73,7 +73,17 @@ void IOModule::SkipSymb() {
 void IOModule::Skip() {
 	string symbToSkip = "\t\n﻿ ";
 	int curStringLen = _curString.length();
-	bool thisIsComment = curStringLen >= 2 && _curString[0] == '/' && _curString[1] == '/';
+	bool thisIsComment = curStringLen > _curSymbNum + 2 && _curString[_curSymbNum] == '/' && _curString[_curSymbNum + 1] == '/';
+	while (!_input.eof() && thisIsComment) {
+		while (_curSymbNum < curStringLen) {
+			_curSymbNum++;
+		}
+		getline(_input, _curString);
+		_curStringNum++;
+		_curSymbNum = 0;
+		curStringLen = _curString.length();
+		thisIsComment = curStringLen > _curSymbNum + 2 && _curString[_curSymbNum] == '/' && _curString[_curSymbNum + 1] == '/';
+	}
 
 	while (!_input.eof() && (_curSymbNum < curStringLen && symbToSkip.find(_curString[_curSymbNum]) != string::npos || thisIsComment)) {
 		_curSymbNum++;
@@ -81,8 +91,18 @@ void IOModule::Skip() {
 			getline(_input, _curString);
 			_curStringNum++;
 			_curSymbNum = 0;
-			thisIsComment = curStringLen >= 2 && _curString[0] == '/' && _curString[1] == '/';
 			curStringLen = _curString.length();
+		}
+		thisIsComment = curStringLen > _curSymbNum + 2 && _curString[_curSymbNum] == '/' && _curString[_curSymbNum + 1] == '/';
+		while (!_input.eof() && thisIsComment) {
+			while (_curSymbNum < curStringLen) {
+				_curSymbNum++;
+			}
+			getline(_input, _curString);
+			_curStringNum++;
+			_curSymbNum = 0;
+			curStringLen = _curString.length();
+			thisIsComment = curStringLen > _curSymbNum + 2 && _curString[_curSymbNum] == '/' && _curString[_curSymbNum + 1] == '/';
 		}
 	}
 	if (_input.eof() && _curString[_curSymbNum] == '\0') {

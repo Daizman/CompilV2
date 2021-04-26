@@ -10,9 +10,9 @@ void semTest();
 int main() {
 	setlocale(LC_ALL, "Russian");
 	//iTest();
-	//lexerTest();
+	lexerTest();
 	//syntTest();
-	semTest();
+	//semTest();
 	return 0;
 }
 
@@ -30,8 +30,8 @@ void iTest() {
 
 void lexerTest() {
 	//auto syntax = new Syntax("testInput1.txt", "output");
-	auto syntax = new Syntax("test1.pas", "output");
-	//auto syntax = new Syntax("errors.pas", "output");
+	//auto syntax = new Syntax("test1.pas", "output");
+	auto syntax = new Syntax("errors.pas", "output");
 	auto lexer = syntax->GetLexer();
 	while (lexer->GetNextToken() != NULL) {
 		cout << lexer->GetCurToken()->ToString();
@@ -50,11 +50,11 @@ void syntTest() {
 }
 
 void semTest() {
-	//auto syntax = new Syntax("synt_test0.pas", "output");
+	auto syntax = new Syntax("synt_test0.pas", "output");
 	//auto syntax = new Syntax("synt_test1.pas", "output");
 	//auto syntax = new Syntax("constTest.pas", "output");
 	//auto syntax = new Syntax("varsTest.pas", "output");
-	auto syntax = new Syntax("sem_test0.pas", "output");
+	//auto syntax = new Syntax("sem_test0.pas", "output");
 	//auto syntax = new Syntax("sem_test1.pas", "output");
 	syntax->BNFProg();
 }
