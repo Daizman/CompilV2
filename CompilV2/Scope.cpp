@@ -15,13 +15,46 @@ SemIdentificator* Scope::CheckTypeByName(string name, vector<ScopeType> ficScope
 	if (_idMap.find(name) == _idMap.end()) {
 		return NULL;
 	}
-	if (CheckScopeTypeVec(ficScope, _idMap[name].GetScope()) != -1) {
-		return &_idMap[name];
+	if (CheckScopeTypeVec(ficScope, _idMap[name]->GetScope()) != -1) {
+		return _idMap[name];
 	}
 	if (_parScope != NULL) {
 		return _parScope->CheckTypeByName(name, ficScope);
 	}
 	return NULL;
+}
+
+SemIdentificator* Scope::CheckName(string name) {
+	if (_idMap.find(name) == _idMap.end()) {
+		return NULL;
+	}
+	if (_idMap[name]->GetScope() == _type) {
+		return _idMap[name];
+	}
+	if (_parScope != NULL) {
+		return _parScope->CheckName(name);
+	}
+	return NULL;
+}
+
+string Scope::StrType(ValueType vt) {
+	switch (vt) {
+	case ValueType::INTEGER:
+		return "integer";
+		break;
+	case ValueType::FLOAT:
+		return "real";
+		break;
+	case ValueType::CHARACTER:
+		return "char";
+		break;
+	case ValueType::STRING:
+		return "string";
+		break;
+	default:
+		return "none";
+		break;
+	}
 }
 
 Scope::Scope(Scope* parScope, IOModule* ioMod, ScopeType sType) {
@@ -43,16 +76,16 @@ void Scope::InitMainScpoe(IOModule* ioMod) {
 	_type = ScopeType::MAIN;
 
 	_types.push_back(ValueType::INTEGER);
-	_idMap.insert({ "integer", SemIdentificator("integer", ScopeType::TYPES, ValueType::INTEGER) });
+	_idMap.insert({ "integer", new SemIdentificator("integer", ScopeType::TYPES, ValueType::INTEGER) });
 
 	_types.push_back(ValueType::FLOAT);
-	_idMap.insert({ "real", SemIdentificator("real", ScopeType::TYPES, ValueType::FLOAT) });
+	_idMap.insert({ "real", new SemIdentificator("real", ScopeType::TYPES, ValueType::FLOAT) });
 
 	_types.push_back(ValueType::STRING);
-	_idMap.insert({ "string", SemIdentificator("string", ScopeType::TYPES, ValueType::STRING) });
+	_idMap.insert({ "string", new SemIdentificator("string", ScopeType::TYPES, ValueType::STRING) });
 
 	_types.push_back(ValueType::CHARACTER);
-	_idMap.insert({ "char", SemIdentificator("char", ScopeType::TYPES, ValueType::CHARACTER) });
+	_idMap.insert({ "char", new SemIdentificator("char", ScopeType::TYPES, ValueType::CHARACTER) });
 }
 
 void Scope::ClearTypes() {
@@ -63,9 +96,16 @@ void Scope::ClearNames() {
 	_names.clear();
 }
 
+void Scope::ClearScopeIfErrors() {
+	if (_errors.size() != 0) {
+		Clear();
+	}
+}
+
 void Scope::Clear() {
 	ClearTypes();
 	ClearNames();
+	_idMap.clear();
 }
 
 void Scope::RaiseError(int strNum, int pos, string reason, int code) {
@@ -83,20 +123,23 @@ void Scope::AddType(string tp) {
 }
 
 void Scope::AddName(string name) {
+	auto n = CheckName(name);
+	if(n != NULL) {
+		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Добавление существующего имени", 73);
+		return;
+	}
 	_names.push_back(name);
 }
 
-void Scope::AddConst(ValueType t, string rp) {
-	if (t == ValueType::NONE) {
-		auto temp = CheckTypeByName(rp, vector<ScopeType> {ScopeType::CONSTS, ScopeType::VARS});
-		if (temp == NULL) {
-			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Переменная не найдена", 71);
-			return;
-		}
-		_types.push_back(temp->GetType());
-		return;
+void Scope::AddConst(string name, Value* val) {
+	_types.push_back(val->GetType());
+	_idMap.insert({ name, new SemIdentificator(StrType(val->GetType()), ScopeType::CONSTS, val->GetType()) });
+}
+
+void Scope::AddVars() {
+	for (auto n : _names) {
+		_idMap.insert({n, new SemIdentificator(StrType(GetTypes()[0]), ScopeType::VARS, GetTypes()[0])});
 	}
-	_types.push_back(t);
 }
 
 vector<string> Scope::GetNames() {

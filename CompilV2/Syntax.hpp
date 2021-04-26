@@ -1,27 +1,12 @@
 #pragma once
 #include "Lexer.hpp"
-
-
-// границы работы: 
-// фиктивный scope: зарезервированные значение: true, false
-// нефиктивный - то что написал пользователь
-// типы - переменные, которые можно переопределять!!!
-// синтаксис после лексера
-// семантика после синтаксиса (параллельно)
-// лексер только за вынос токена
-
-// ПРОПУСК ОШИБОК:
-// для каждой конструкции БНФ, одна большая для программы
-// для каждой БНФ своя функция
-// ошибки пропускаем глобально
-// для каждой функции будет список слов, которые могут идти после
-// пропускаю до след. слова или конца программы (var - begin, например)
-// это передаем
+#include "Semantic.h"
 
 
 class Syntax {
 private:
 	Lexer* _lexer;
+	Semantic* _semant;
 	IOModule* _ioModule;
 	Token* _curToken;
 	vector<IdentificatorToken*> _idents;
@@ -41,6 +26,7 @@ private:
 	bool IsMultipl();
 	bool CheckIdentWS(string);
 	bool CheckIdent(string);
+	ValueType VTByString(string);
 public:
 	Syntax(string, string);
 	~Syntax();

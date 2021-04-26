@@ -11,8 +11,8 @@ int main() {
 	setlocale(LC_ALL, "Russian");
 	//iTest();
 	//lexerTest();
-	//syntTest();
-	semTest();
+	syntTest();
+	//semTest();
 	return 0;
 }
 

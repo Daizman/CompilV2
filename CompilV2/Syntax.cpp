@@ -6,11 +6,13 @@ Syntax::Syntax(string fIn, string fOut) {
 	_lexer = new Lexer(_ioModule);
 	_curToken = NULL;
 	_progName = "";
+	_semant = new Semantic(_ioModule);
 }
 
 Syntax::~Syntax() {
 	delete _ioModule;
 	delete _lexer;
+	delete _semant;
 }
 
 Lexer* Syntax::GetLexer() {
@@ -137,6 +139,22 @@ bool Syntax::CheckIdent(string ident) {
 	}
 	NextToken();
 	return true;
+}
+
+ValueType Syntax::VTByString(string vt) {
+	if (vt == "integer") {
+		return ValueType::INTEGER;
+	}
+	if (vt == "real") {
+		return ValueType::FLOAT;
+	}
+	if (vt == "char") {
+		return ValueType::CHARACTER;
+	}
+	if (vt == "string") {
+		return ValueType::STRING;
+	}
+	return ValueType::NONE;
 }
 
 bool Syntax::CheckIdentWS(string ident) {
@@ -301,6 +319,7 @@ void Syntax::BNFBlock() {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе определен следующий об€зательный блок", 40);
 		return;
 	}
+	_semant->GetLastScope()->ClearScopeIfErrors();
 	identToken = (IdentificatorToken*)_curToken;
 	ident = identToken->GetValue();
 
@@ -317,6 +336,7 @@ void Syntax::BNFBlock() {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе определен следующий об€зательный блок", 40);
 		return;
 	}
+	_semant->GetLastScope()->ClearScopeIfErrors();
 
 	BNFOpers();
 }
@@ -324,6 +344,7 @@ void Syntax::BNFBlock() {
 // <раздел констант>::=<пусто>|const <определение константы>; {<определение константы>;}
 void Syntax::BNFConsts() {
 	vector<string> constsBlock = { "const", "var", "begin" };
+
 	if (EmptyToken() || _curToken->GetType() != TokenType::IDENTIFICATOR) {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе указаны имена констант", 50);
 		SkipToOper(";");
@@ -341,6 +362,10 @@ void Syntax::BNFConsts() {
 	}
 	if (identStr == "var" || identStr == "begin") {
 		return;
+	}
+	if (_semant->GetLastScope()->GetScopeType() != ScopeType::CONSTS) {
+		_semant->CreateScope();
+		_semant->GetLastScope()->SetScopeType(ScopeType::CONSTS);
 	}
 	BNFConstDif();
 	while (!EmptyToken() && _curToken->GetType() == TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() == ";") {
@@ -373,6 +398,10 @@ void Syntax::BNFVariants() {
 	if (identStr == "begin") {
 		return;
 	}
+	if (_semant->GetLastScope()->GetScopeType() != ScopeType::VARS) {
+		_semant->CreateScope();
+		_semant->GetLastScope()->SetScopeType(ScopeType::VARS);
+	}
 	BNFSingleTypeVariants();
 	while (!EmptyToken() && _curToken->GetType() == TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() == ";") {
 		NextToken();
@@ -404,19 +433,23 @@ void Syntax::BNFConstDif() {
 	if (StrVecChecker({ "const", "var", "begin" }, ((IdentificatorToken*)_curToken)->GetValue()->GetName()) != -1) {
 		return;
 	}
-
+	auto lp = ((IdentificatorToken*)_curToken)->GetValue();
+	_semant->GetLastScope()->AddName(lp->GetName());
 	NextToken();
 	if (EmptyToken()) {
+		_semant->GetLastScope()->Clear();
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе определен следующий об€зательный блок", 40);
 		return;
 	}
 
 	if (_curToken->GetType() != TokenType::OPERATOR) {
+		_semant->GetLastScope()->Clear();
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе указано значение константы", 52);
 		return;
 	}
 
 	if (_curToken->GetType() == TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() != "=") {
+		_semant->GetLastScope()->Clear();
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе указано значение константы", 52);
 		return;
 	}
@@ -424,14 +457,18 @@ void Syntax::BNFConstDif() {
 	NextToken();
 
 	if (EmptyToken()) {
+		_semant->GetLastScope()->Clear();
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе указано значение константы", 52);
 		return;
 	}
 
 	if (_curToken->GetType() != TokenType::VALUE) {
+		_semant->GetLastScope()->Clear();
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе указано значение константы", 52);
 		return;
 	}
+	auto rp = ((ValueToken*)_curToken)->GetValue();
+	_semant->GetLastScope()->AddConst(lp->GetName(), rp);
 	NextToken();
 }
 
@@ -450,48 +487,57 @@ void Syntax::BNFSingleTypeVariants() {
 	if (StrVecChecker({ "var", "begin" }, ((IdentificatorToken*)_curToken)->GetValue()->GetName()) != -1) {
 		return;
 	}
+	auto lp = ((IdentificatorToken*)_curToken)->GetValue();
+	_semant->GetLastScope()->AddName(lp->GetName());
 
 	while (!EmptyToken() && _curToken->GetType() == TokenType::IDENTIFICATOR) {
 		NextToken();
 		if (EmptyToken()) {
+			_semant->GetLastScope()->Clear();
 			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе определен следующий об€зательный блок", 40);
 			return;
 		}
 		if (_curToken->GetType() != TokenType::OPERATOR) {
+			_semant->GetLastScope()->Clear();
 			RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќеправильно указаны имена переменных", 61);
 			return;
 		}
 		if (((OperatorToken*)_curToken)->GetValue()->GetSymb() == ",") {
 			NextToken();
+			lp = ((IdentificatorToken*)_curToken)->GetValue();
+			_semant->GetLastScope()->AddName(lp->GetName());
 		}
 	}
 	if (EmptyToken()) {
+		_semant->GetLastScope()->Clear();
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе указан тип переменных", 62);
 		return;
 	}
 	if (_curToken->GetType() != TokenType::OPERATOR || (_curToken->GetType() == TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() != ":")) {
+		_semant->GetLastScope()->Clear();
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе указан тип переменных", 62);
 		return;
 	}
 	NextToken();
 	if (_curToken->GetType() != TokenType::IDENTIFICATOR) {
+		_semant->GetLastScope()->Clear();
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе указан тип переменных", 62);
 		return;
 	}
 	auto iTokenVal = ((IdentificatorToken*)_curToken)->GetValue()->GetName();
 	if (iTokenVal != "integer" && iTokenVal != "double" && iTokenVal != "char" && iTokenVal != "string" && iTokenVal != "real") {
+		_semant->GetLastScope()->Clear();
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќеправильно указан тип переменных", 63);
 		return;
 	}
+	auto rp = ((IdentificatorToken*)_curToken)->GetValue();
+	_semant->GetLastScope()->AddType(iTokenVal);
+	_semant->GetLastScope()->AddVars();
 	NextToken();
 }
 
 // <составной оператор>::= begin <оператор>{;<оператор>} end
 void Syntax::BNFConcOper() {
-	/*if (!CheckIdentWS("begin")) {
-		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе определен следующий об€зательный блок", 40);
-		return;
-	}*/
 	NextToken();
 	if (EmptyToken()) {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Ќе закрыт об€зательный блок", 41);

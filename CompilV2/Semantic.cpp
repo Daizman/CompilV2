@@ -2,6 +2,7 @@
 
 Semantic::Semantic(IOModule* ioMod) {
 	_ioMod = ioMod;
+	CreateMainScope();
 }
 
 Semantic::~Semantic() {

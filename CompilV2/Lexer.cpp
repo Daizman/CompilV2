@@ -243,7 +243,6 @@ void Lexer::OtherSymbHandler(char symb) {
 Token* Lexer::GetNextToken() {
 	char symb = _ioModule->GetCurSymb();
     int curStrNum, curStrPos;
-    char futureChar;
 
 	if (_ioModule->IsEnd()) {
 		return NULL;

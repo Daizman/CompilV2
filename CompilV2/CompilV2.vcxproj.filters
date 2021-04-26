@@ -64,7 +64,7 @@
       <Filter>Исходные файлы\Modules</Filter>
     </ClCompile>
     <ClCompile Include="Scope.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Structs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -116,7 +116,7 @@
       <Filter>Файлы заголовков\Structs\Enums</Filter>
     </ClInclude>
     <ClInclude Include="Scope.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Файлы заголовков\Structs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
