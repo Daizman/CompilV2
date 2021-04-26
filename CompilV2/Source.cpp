@@ -4,12 +4,15 @@
 void iTest();
 void lexerTest();
 void syntTest();
+void semTest();
+
 
 int main() {
 	setlocale(LC_ALL, "Russian");
 	//iTest();
 	//lexerTest();
-	syntTest();
+	//syntTest();
+	semTest();
 	return 0;
 }
 
@@ -37,13 +40,15 @@ void lexerTest() {
 }
 
 void syntTest() {
-	auto syntax = new Syntax("synt_test0.pas", "output");
+	//auto syntax = new Syntax("synt_test0.pas", "output");
 	//auto syntax = new Syntax("synt_test1.pas", "output");
 	//auto syntax = new Syntax("constTest.pas", "output");
-	//auto syntax = new Syntax("constTest.pas", "output");
-	//auto syntax = new Syntax("varsTest.pas", "output");
-	//auto syntax = new Syntax("constAndVars.pas", "output");
+	auto syntax = new Syntax("varsTest.pas", "output");
 	syntax->BNFProg();
 	syntax->PrintErrors();
 	syntax->GetLexer()->PrintErrors();
+}
+
+void semTest() {
+	
 }

@@ -523,7 +523,7 @@ void Syntax::BNFSingleTypeVariants() {
 		return;
 	}
 	auto iTokenVal = ((IdentificatorToken*)_curToken)->GetValue()->GetName();
-	if (iTokenVal != "integer" && iTokenVal != "double" && iTokenVal != "char" && iTokenVal != "string") {
+	if (iTokenVal != "integer" && iTokenVal != "double" && iTokenVal != "char" && iTokenVal != "string" && iTokenVal != "real") {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Неправильно указан тип переменных", 63);
 		return;
 	}
