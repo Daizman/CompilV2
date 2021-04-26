@@ -362,7 +362,6 @@ void Syntax::BNFBlock() {
 		return;
 	}
 
-	NextToken();
 	BNFOpers();
 }
 
@@ -546,15 +545,18 @@ void Syntax::BNFConcOper() {
 		RaiseError(_ioModule->GetCurStringNum(), _ioModule->GetCurSymbNum(), "Одиночное значение", 42);
 		return;
 	}
-	BNFOper();
 	while (!EmptyToken() 
-		&& _curToken->GetType() != TokenType::OPERATOR 
+		// && _curToken->GetType() != TokenType::OPERATOR 
 		&& _curToken->GetType() != TokenType::VALUE
 		&& !CheckIdentWS("end")) {
 		BNFOper();
 	}
 
 	CheckIdent("end");
+	if (_curToken->GetType() == TokenType::OPERATOR && ((OperatorToken*)_curToken)->GetValue()->GetSymb() == ".") {
+		return;
+	}
+	CheckLexem(";");
 }
 
 // <оператор>::=<непомеченный оператор>
@@ -579,7 +581,7 @@ void Syntax::BNFNotMarkedOper() {
 		return;
 	}
 	BNFSimpleOper();
-	NextToken();
+	CheckLexem(";");
 }
 
 // <простой оператор>::=<оператор присваивания>
@@ -597,6 +599,7 @@ void Syntax::BNFDiffExpr() {
 
 // <оператор присваивания>::=<переменная>:=<выражение>
 void Syntax::BNFOperAssigm() {
+	BNFVar();
 	CheckLexem(":=");
 	BNFExpres();
 }

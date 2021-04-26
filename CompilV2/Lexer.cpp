@@ -253,25 +253,29 @@ Token* Lexer::GetNextToken() {
         symb = _ioModule->GetNextSymb();
     }
 
-    if (_curToken != NULL) {
+    /*if (_curToken != NULL) {
         delete _curToken;
-    }
+    }*/
 
 	if (IsCharacter(symb)) {
         CharacterTokenHandler(symb);
         _ioModule->GetNextSymb();
 	} else if (IsDigit(symb)) {
-        auto _oldToken = _curToken;
+        auto _oldTokenStr = _curToken->GetStrNum();
+        auto _oldTokenStart = _curToken->GetStartPos();
+        auto _oldTokenType = _curToken->GetType();
         DigitTokenHandler(symb);
-        if (_oldToken == _curToken) {
+        if (_oldTokenStart == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
             _curToken = GetNextToken();
         } else {
             _ioModule->GetNextSymb();
         }
 	} else if (symb == '\'') {
-        auto _oldToken = _curToken;
+        auto _oldTokenStr = _curToken->GetStrNum();
+        auto _oldTokenStart = _curToken->GetStartPos();
+        auto _oldTokenType = _curToken->GetType();
         StringTokenHandler(symb);
-        if (_oldToken == _curToken) {
+        if (_oldTokenStart == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
             _curToken = GetNextToken();
         } else {
             _ioModule->GetNextSymb();
@@ -294,16 +298,20 @@ Token* Lexer::GetNextToken() {
         MoreHandler(symb);
         _ioModule->GetNextSymb();
     } else if (symb == '-') {
-        auto _oldToken = _curToken;
+        auto _oldTokenStr = _curToken->GetStrNum();
+        auto _oldTokenStart = _curToken->GetStartPos();
+        auto _oldTokenType = _curToken->GetType();
         DigitTokenHandler(symb);
-        if (_oldToken == _curToken) {
+        if (_oldTokenStart == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
             _curToken = GetNextToken();
         }
         _ioModule->GetNextSymb();
     } else {
-        auto _oldToken = _curToken;
+        auto _oldTokenStr = _curToken->GetStrNum();
+        auto _oldTokenStart = _curToken->GetStartPos();
+        auto _oldTokenType = _curToken->GetType();
         OtherSymbHandler(symb);
-        if (_oldToken == _curToken) {
+        if (_oldTokenStart == _curToken->GetStrNum() && _oldTokenStart == _curToken->GetStartPos() && _oldTokenType == _curToken->GetType()) {
             _ioModule->GetNextSymb();
             _curToken = GetNextToken();
         } else {
